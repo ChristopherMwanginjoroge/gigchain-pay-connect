@@ -1,5 +1,7 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Play } from "lucide-react";
+import { ArrowRight, Play, ArrowDownRight, Clock, AlertCircle, CheckCircle2 } from "lucide-react";
+import narrativeSender from "@/assets/narrative-sender.png";
+import narrativeTransit from "@/assets/narrative-transit.png";
 import humanStruggle from "@/assets/human-struggle.png";
 
 const HeroSection = () => {
@@ -29,8 +31,6 @@ const HeroSection = () => {
             </p>
           </div>
 
-          {/* CTA Area removed per request */}
-
           {/* Visualizing the Grid of Friction vs Flow */}
           <div className="grid md:grid-cols-3 gap-6 mb-24 animate-fade-up" style={{ animationDelay: '0.3s' }}>
             <div className="p-8 bg-black/5 backdrop-blur-xl rounded-[2rem] border border-black/10 shadow-sm transition-all hover:bg-black/10">
@@ -47,27 +47,68 @@ const HeroSection = () => {
             </div>
           </div>
 
-          {/* The Visual Narrative of Struggle - Refined & Human-Centric */}
-          <div className="mt-20 max-w-xl mx-auto animate-fade-up" style={{ animationDelay: '0.4s' }}>
-            <p className="text-primary/40 text-[10px] font-bold uppercase tracking-[0.4em] mb-10">The Human Cost of Legacy Finance</p>
-            <div className="relative group p-1.5 bg-white/50 backdrop-blur-sm rounded-[2.5rem] border border-white/20 shadow-xl">
-              <div className="relative rounded-[2rem] overflow-hidden bg-white shadow-inner aspect-square">
-                <img
-                  src={humanStruggle}
-                  alt="Freelancer experiencing transfer delay"
-                  className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-700 hover:scale-105"
-                />
-                {/* Simplified Overlay */}
-                <div className="absolute inset-x-0 bottom-0 p-8 bg-gradient-to-t from-black/80 to-transparent flex flex-col items-center">
-                  <p className="text-accent font-bold uppercase tracking-[0.4em] text-[8px] mb-2 text-center">Bypass the digital barrier</p>
-                  <h3 className="text-white text-lg font-bold tracking-tight text-center px-4">Financial Autonomy vs. Transactional Inertia</h3>
+          {/* The Visual Narrative of Struggle - Expanded Triple Visual */}
+          <div className="mt-20 max-w-5xl mx-auto animate-fade-up" style={{ animationDelay: '0.4s' }}>
+            <p className="text-primary/40 text-[10px] font-bold uppercase tracking-[0.4em] mb-12">The Path of Traditional Friction</p>
+
+            <div className="grid lg:grid-cols-3 gap-8 items-stretch">
+              {/* Stage 1: The Sender */}
+              <div className="relative group">
+                <div className="relative rounded-[2rem] overflow-hidden bg-black shadow-2xl aspect-square border-2 border-primary/5">
+                  <img src={narrativeSender} alt="Payment successfully sent" className="w-full h-full object-contain p-4 group-hover:scale-110 transition-transform duration-700" />
+                  <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-black/80 to-transparent text-left">
+                    <div className="flex items-center gap-2 mb-1">
+                      <CheckCircle2 className="w-3 h-3 text-accent" />
+                      <p className="text-white/60 font-bold uppercase tracking-widest text-[8px]">Stage 01: The Sender</p>
+                    </div>
+                    <h4 className="text-white text-md font-bold italic">"Successfully Sent"</h4>
+                  </div>
+                </div>
+                <div className="hidden lg:flex absolute -right-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-primary text-white items-center justify-center shadow-lg">
+                  <ArrowRight className="w-5 h-5" />
                 </div>
               </div>
 
-              {/* Floating badge refined */}
-              <div className="absolute -top-6 -right-6 w-24 h-24 bg-destructive text-white rounded-full flex items-center justify-center font-bold text-center border-4 border-white shadow-2xl -rotate-12">
-                <p className="text-[10px] leading-tight font-black">STOP THE<br />FEE DRAIN</p>
+              {/* Stage 2: The Transit (Friction) */}
+              <div className="relative group">
+                <div className="relative rounded-[2rem] overflow-hidden bg-black shadow-2xl aspect-square border-2 border-primary/5">
+                  <img src={narrativeTransit} alt="Payment processing delay" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700" />
+                  <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-black/80 to-transparent text-left">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Clock className="w-3 h-3 text-destructive" />
+                      <p className="text-destructive font-bold uppercase tracking-widest text-[8px]">Stage 02: Legacy Transit</p>
+                    </div>
+                    <h4 className="text-white text-md font-bold italic">Intermediary Holds & Fees</h4>
+                  </div>
+                </div>
+                <div className="hidden lg:flex absolute -right-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-destructive text-white items-center justify-center shadow-lg animate-pulse">
+                  <ArrowRight className="w-5 h-5" />
+                </div>
               </div>
+
+              {/* Stage 3: The Recipient (Human Struggle) */}
+              <div className="relative group">
+                <div className="relative rounded-[2rem] overflow-hidden bg-white shadow-2xl aspect-square border-4 border-destructive/20">
+                  <img src={humanStruggle} alt="Frustrated recipient waiting" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                  <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-black/80 to-transparent text-left">
+                    <div className="flex items-center gap-2 mb-1">
+                      <AlertCircle className="w-3 h-3 text-destructive" />
+                      <p className="text-white/60 font-bold uppercase tracking-widest text-[8px]">Stage 03: The Recipient</p>
+                    </div>
+                    <h4 className="text-white text-md font-bold italic">"Where is my money?"</h4>
+                  </div>
+                  {/* Floating badge refined */}
+                  <div className="absolute -top-4 -right-4 w-20 h-20 bg-destructive text-white rounded-full flex items-center justify-center font-bold text-center border-4 border-white shadow-2xl -rotate-12">
+                    <p className="text-[9px] leading-tight font-black">7-DAY<br />DELAY</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-12 text-center">
+              <p className="text-primary/60 font-medium italic">
+                GigChain Pay collapses this expensive maze into a single, atomic second.
+              </p>
             </div>
           </div>
         </div>
