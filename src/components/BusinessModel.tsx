@@ -1,74 +1,111 @@
 import { CheckCircle } from "lucide-react";
-import roiImage from "@/assets/roi-infographic.jpg";
 
 const benefits = [
-  "0.5-1% transparent transaction fees",
-  "Premium features for power users",
-  "DeFi yield sharing for passive income",
-  "Referral bonuses for growing the network",
+  {
+    title: "Transactional Integrity",
+    text: "0.5-1% transparent protocol fees—bypassing the 7-15% legacy tax."
+  },
+  {
+    title: "Scalable Economics",
+    text: "Projected $408K annual ARR at 10K active users through network velocity."
+  },
+  {
+    title: "Direct User Impact",
+    text: "Average $25+ monthly savings per freelancer in fee recovery alone."
+  },
+  {
+    title: "Premium Liquidity",
+    text: "Access to yield-bearing vaults and higher-tier settlement limits."
+  },
 ];
 
 const BusinessModel = () => {
   return (
-    <section id="benefits" className="py-20 lg:py-28 bg-muted/30">
-      <div className="container">
-        <div className="text-center mb-16">
-          <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-4">
-            Business Model
-          </span>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4">
-            Why Choose <span className="text-accent">GigChain Pay</span>
+    <section id="benefits" className="py-16 lg:py-24 bg-primary relative overflow-hidden">
+      {/* Dynamic background elements */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/5 rounded-full blur-[100px] translate-x-1/4 -translate-y-1/4" />
+      <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-white/5 rounded-full blur-[80px] -translate-x-1/4 translate-y-1/4" />
+
+      <div className="container relative z-10">
+        <div className="text-center mb-16 animate-fade-up">
+          <div className="inline-block px-4 py-1.5 rounded-full bg-white/10 text-white text-[11px] font-bold uppercase tracking-wider mb-5 border border-white/10">
+            Economic Dynamics
+          </div>
+          <h2 className="text-2xl md:text-5xl font-bold text-white mb-5 tracking-tight">
+            Why Choose <span className="text-accent italic">GigChain Pay.</span>
           </h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            A sustainable model that benefits both users and the platform.
+          <p className="text-white/60 text-base md:text-lg max-w-2xl mx-auto font-medium">
+            Sustainable, low-friction infrastructure engineered for the 83% informal economy.
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left content */}
-          <div>
-            <div className="bg-card rounded-2xl p-8 border border-border shadow-sm mb-8">
-              <h3 className="text-2xl font-bold text-foreground mb-6">Revenue & Benefits</h3>
-              <ul className="space-y-4">
-                {benefits.map((benefit) => (
-                  <li key={benefit} className="flex items-start gap-3">
-                    <CheckCircle className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
-                    <span className="text-foreground">{benefit}</span>
-                  </li>
-                ))}
-              </ul>
+        <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+          {/* Left content - Value Matrix */}
+          <div className="space-y-6">
+            <div className="grid sm:grid-cols-2 gap-6">
+              {benefits.map((benefit, index) => (
+                <div
+                  key={benefit.title}
+                  className="bg-white/5 backdrop-blur-md border border-white/10 rounded-[2rem] p-7 hover:bg-white/10 transition-all duration-500 group"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                    <CheckCircle className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="text-white font-bold mb-2 tracking-tight">{benefit.title}</h3>
+                  <p className="text-white/40 text-xs font-medium leading-relaxed">{benefit.text}</p>
+                </div>
+              ))}
             </div>
 
-            {/* Stats cards */}
-            <div className="grid sm:grid-cols-3 gap-4">
-              <div className="bg-card rounded-xl p-6 border border-border text-center shadow-sm hover:shadow-md transition-shadow">
-                <p className="text-3xl font-bold text-accent mb-1">$25+</p>
-                <p className="text-sm text-muted-foreground">Monthly User Savings</p>
-              </div>
-              <div className="bg-card rounded-xl p-6 border border-border text-center shadow-sm hover:shadow-md transition-shadow">
-                <p className="text-3xl font-bold text-primary mb-1">10K</p>
-                <p className="text-sm text-muted-foreground">Target Users Y1</p>
-              </div>
-              <div className="bg-card rounded-xl p-6 border border-border text-center shadow-sm hover:shadow-md transition-shadow">
-                <p className="text-3xl font-bold text-accent mb-1">$408K</p>
-                <p className="text-sm text-muted-foreground">Projected Annual Revenue</p>
+            {/* Performance Metrics */}
+            <div className="bg-white rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-2xl translate-x-8 -translate-y-8" />
+              <h3 className="text-xl font-bold text-primary mb-6 italic">Impact Projections</h3>
+              <div className="grid grid-cols-3 gap-6">
+                <div>
+                  <p className="text-2xl font-black text-primary mb-1">$25+</p>
+                  <p className="text-[9px] font-bold text-primary/40 uppercase tracking-widest leading-tight">Monthly <br />User Savings</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-black text-primary mb-1">$408K</p>
+                  <p className="text-[9px] font-bold text-primary/40 uppercase tracking-widest leading-tight">Target <br />Annual Rev</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-black text-primary mb-1">&lt;2%</p>
+                  <p className="text-[9px] font-bold text-primary/40 uppercase tracking-widest leading-tight">Total <br />Friction</p>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Right image */}
-          <div className="relative">
-            <div className="bg-card rounded-2xl overflow-hidden border border-border shadow-lg">
-              <img 
-                src={roiImage} 
-                alt="ROI and growth projections infographic" 
-                className="w-full h-auto"
-              />
+          {/* Right Content - The Network Edge */}
+          <div className="animate-fade-up">
+            <h3 className="text-2xl font-bold text-white mb-6 tracking-tight">The Network Edge</h3>
+            <div className="space-y-5">
+              <div className="p-5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm">
+                <p className="text-white font-bold text-[10px] uppercase tracking-widest mb-2 text-accent">Atomic vs Centralized</p>
+                <p className="text-white/70 text-xs leading-relaxed font-medium">
+                  While competitors like Yellow Card and Kotani Pay focus on merchant payments with 1-3% centralized tolls, we deliver peer-to-peer liquidity with ~$0.0001 protocol costs.
+                </p>
+              </div>
+              <div className="p-5 rounded-2xl bg-white/10 border border-white/20 backdrop-blur-sm">
+                <p className="text-white font-bold text-[10px] uppercase tracking-widest mb-2 text-accent">Sovereign Independence</p>
+                <p className="text-white/70 text-xs leading-relaxed font-medium">
+                  Bypass the mandatory bank dependencies and custodial lock-ins of legacy providers. GigChain Pay is the first genuinely independent solution for Kenya's talent frontier.
+                </p>
+              </div>
             </div>
-            
-            {/* Floating badge */}
-            <div className="absolute -bottom-4 -right-4 bg-accent text-accent-foreground rounded-xl px-6 py-3 shadow-lg">
-              <p className="text-sm font-semibold">4-8% APY on Holdings</p>
+
+            <div className="mt-10 p-1 bg-gradient-to-r from-white/20 to-transparent rounded-2xl">
+              <div className="bg-primary p-5 rounded-[0.9rem] flex items-center justify-between">
+                <div>
+                  <p className="text-white font-bold text-base tracking-tight">Aligned with CBK/AML</p>
+                  <p className="text-white/40 text-[9px] font-medium uppercase tracking-widest">Regulatory Security Built-in</p>
+                </div>
+                <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">
+                  <span className="text-white font-bold text-lg">✓</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Mail, ArrowRight, Shield, FileText } from "lucide-react";
+import { Mail, ArrowRight, Shield, FileText, Twitter, Github, Linkedin, Slack } from "lucide-react";
 
 const Footer = () => {
   const [email, setEmail] = useState("");
@@ -16,93 +16,128 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-primary text-primary-foreground">
-      {/* CTA Section */}
-      <div className="container py-16 lg:py-24">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
-            Ready to Earn More from Your Global Gigs?
-          </h2>
-          <p className="text-primary-foreground/80 text-lg mb-8">
-            Join the beta and be among the first to experience seamless, low-cost international payments.
-          </p>
+    <footer className="bg-primary text-white relative overflow-hidden">
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[300px] bg-white/5 rounded-full blur-[100px] pointer-events-none" />
 
-          {!submitted ? (
-            <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-              <div className="relative flex-1">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                <Input
-                  type="email"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="pl-12 h-14 bg-primary-foreground text-foreground border-0 rounded-xl"
-                  required
-                />
-              </div>
-              <Button type="submit" variant="hero" size="xl" className="rounded-xl">
-                Join the Beta
-                <ArrowRight className="ml-2 w-5 h-5" />
-              </Button>
-            </form>
-          ) : (
-            <div className="bg-accent/20 rounded-xl p-6 max-w-md mx-auto">
-              <p className="text-accent font-semibold">🎉 You're on the list!</p>
-              <p className="text-primary-foreground/80 text-sm mt-1">We'll notify you when beta access opens.</p>
-            </div>
-          )}
-
-          {/* Trust badges */}
-          <div className="flex flex-wrap items-center justify-center gap-6 mt-10 pt-10 border-t border-primary-foreground/20">
-            <div className="flex items-center gap-2 text-primary-foreground/70">
-              <Shield className="w-5 h-5" />
-              <span className="text-sm">Bank-Grade Security</span>
-            </div>
-            <div className="flex items-center gap-2 text-primary-foreground/70">
-              <FileText className="w-5 h-5" />
-              <span className="text-sm">Regulated USDC</span>
-            </div>
-            <div className="flex items-center gap-2 text-primary-foreground/70">
-              <div className="w-5 h-5 rounded bg-primary-foreground/20 flex items-center justify-center text-xs font-bold">H</div>
-              <span className="text-sm">Powered by Hedera</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Bottom footer */}
-      <div className="border-t border-primary-foreground/10">
-        <div className="container py-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            {/* Logo */}
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center">
-                <span className="text-accent-foreground font-bold text-sm">GC</span>
-              </div>
-              <span className="font-bold text-xl">GigChain Pay</span>
-            </div>
-
-            {/* Links */}
-            <div className="flex flex-wrap items-center justify-center gap-6 text-sm">
-              <a href="#" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">Privacy Policy</a>
-              <a href="#" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">Terms of Service</a>
-              <a href="#" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">Contact</a>
-              <a href="mailto:hello@gigchainpay.com" className="text-primary-foreground/70 hover:text-primary-foreground transition-colors">hello@gigchainpay.com</a>
-            </div>
-          </div>
-
-          {/* Disclaimers */}
-          <div className="mt-8 pt-6 border-t border-primary-foreground/10">
-            <p className="text-primary-foreground/50 text-xs text-center leading-relaxed max-w-3xl mx-auto">
-              <strong>Disclaimer:</strong> GigChain Pay is currently in testnet phase. USDC is a regulated stablecoin issued by Circle. 
-              Cryptocurrency transactions carry inherent risks. Past performance does not guarantee future results. 
-              Yield rates are variable and subject to market conditions. Always do your own research before using any financial service.
+      {/* CTA / Newsletter Section - Modern Premium */}
+      <div className="container relative z-10 py-20 lg:py-32">
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
+          <div className="animate-fade-up">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight leading-[1.1]">
+              Engineered for the <br />
+              <span className="text-accent underline decoration-accent/30 underline-offset-8">Global Frontier.</span>
+            </h2>
+            <p className="text-white/60 text-lg font-medium max-w-lg">
+              Join 2,400+ developers and companies building the future of cross-border settlements.
             </p>
           </div>
 
-          <p className="text-primary-foreground/50 text-xs text-center mt-6">
-            © 2025 GigChain Pay. All rights reserved.
+          <div className="animate-fade-up" style={{ animationDelay: '0.1s' }}>
+            {!submitted ? (
+              <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 p-2 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 group focus-within:border-white/40 transition-colors">
+                <div className="relative flex-1">
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
+                  <Input
+                    type="email"
+                    placeholder="Enter your email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="pl-12 h-14 bg-transparent border-0 rounded-xl font-medium placeholder:text-white/20 focus-visible:ring-0 focus-visible:ring-offset-0 text-white"
+                    required
+                  />
+                </div>
+                <Button type="submit" className="h-14 rounded-xl bg-white text-primary hover:bg-white/90 px-8 font-bold shadow-lg shadow-white/10">
+                  Join Beta Access
+                  <ArrowRight className="ml-2 w-5 h-5" />
+                </Button>
+              </form>
+            ) : (
+              <div className="bg-white/10 border border-white/20 p-8 rounded-2xl animate-fade-in">
+                <p className="text-white/60 font-bold uppercase tracking-[0.2em] text-xs mb-2">ACCESS_PENDING</p>
+                <p className="text-white font-bold text-lg italic">Welcome to the priority list.</p>
+              </div>
+            )}
+
+            <div className="mt-8 flex items-center gap-6">
+              <div className="flex items-center gap-2 text-white/40 text-[10px] font-bold uppercase tracking-[0.2em]">
+                <Shield className="w-4 h-4" />
+                <span>Bank-Grade Integrity</span>
+              </div>
+              <div className="flex items-center gap-2 text-white/40 text-[10px] font-bold uppercase tracking-[0.2em]">
+                <FileText className="w-4 h-4" />
+                <span>Circle Regulated</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Brand & Links */}
+        <div className="mt-24 pt-16 border-t border-white/10 grid md:grid-cols-4 lg:grid-cols-5 gap-12">
+          <div className="md:col-span-2">
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-10 h-10 bg-white flex items-center justify-center rounded-xl">
+                <span className="text-primary font-bold text-lg">GP</span>
+              </div>
+              <span className="text-2xl font-bold tracking-tight">GigPay</span>
+            </div>
+            <p className="text-white/40 text-sm font-medium leading-relaxed max-w-xs mb-8">
+              The high-performance settlement layer for the global economy. Built on the integrity of the Hedera network.
+            </p>
+            <div className="flex items-center gap-4">
+              <a href="#" className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center hover:bg-white/20 transition-colors">
+                <Twitter className="w-5 h-5 text-white/60" />
+              </a>
+              <a href="#" className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center hover:bg-white/20 transition-colors">
+                <Github className="w-5 h-5 text-white/60" />
+              </a>
+              <a href="#" className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center hover:bg-white/20 transition-colors">
+                <Linkedin className="w-5 h-5 text-white/60" />
+              </a>
+              <a href="#" className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center hover:bg-white/20 transition-colors">
+                <Slack className="w-5 h-5 text-white/60" />
+              </a>
+            </div>
+          </div>
+
+          <div>
+            <h4 className="font-bold text-white mb-6 uppercase tracking-widest text-[11px]">Protocol</h4>
+            <ul className="space-y-4">
+              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-sm font-medium">Liquidity Pool</a></li>
+              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-sm font-medium">Network Status</a></li>
+              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-sm font-medium">Hedera Token Svc</a></li>
+              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-sm font-medium">Governance</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-bold text-white mb-6 uppercase tracking-widest text-[11px]">Resources</h4>
+            <ul className="space-y-4">
+              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-sm font-medium">Documentation</a></li>
+              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-sm font-medium">Integrations</a></li>
+              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-sm font-medium">Security Audit</a></li>
+              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-sm font-medium">Ecosystem</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-bold text-white mb-6 uppercase tracking-widest text-[11px]">Company</h4>
+            <ul className="space-y-4">
+              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-sm font-medium">About</a></li>
+              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-sm font-medium">Terms</a></li>
+              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-sm font-medium">Privacy</a></li>
+              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-sm font-medium">Contact</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="mt-24 pb-12 border-t border-white/10 pt-12 flex flex-col md:flex-row items-center justify-between gap-6">
+          <p className="text-white/20 text-xs font-medium tracking-tight">
+            © 2026 GIGPAY NETWORK. ALL RIGHTS RESERVED.
           </p>
+          <div className="flex gap-8">
+            <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em]">HEDERA_ECOSYSTEM</span>
+            <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em]">USDC_COMPLIANT</span>
+          </div>
         </div>
       </div>
     </footer>
