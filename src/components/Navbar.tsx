@@ -27,20 +27,20 @@ const Navbar = () => {
                     }
         `}>
                     <div className="flex items-center gap-2">
-                        <div className="w-9 h-9 bg-primary flex items-center justify-center rounded-xl shadow-md">
-                            <span className="text-white font-bold text-sm tracking-tight">GP</span>
+                        <div className="w-9 h-9 flex items-center justify-center overflow-hidden rounded-xl">
+                            <img src="/favicon.png" alt="GigPay Logo" className="w-full h-full object-contain" />
                         </div>
                         <span className="text-primary font-bold text-xl tracking-tight">GigPay</span>
                     </div>
 
                     <div className="hidden md:flex items-center gap-8">
-                        <a href="#problem" className="text-primary/60 hover:text-primary transition-colors text-sm font-medium">Inside Stripe</a>
+                        <a href="#problem" className="text-primary/60 hover:text-primary transition-colors text-sm font-medium">Why GigPay</a>
                         <a href="#how-it-works" className="text-primary/60 hover:text-primary transition-colors text-sm font-medium">How it works</a>
                         <a href="#features" className="text-primary/60 hover:text-primary transition-colors text-sm font-medium">Network</a>
                     </div>
 
                     <Button size="sm" className="rounded-xl px-6 bg-primary font-semibold hover:shadow-glow transition-all">
-                        Launch App
+                        Download App
                     </Button>
                 </div>
             </div>
