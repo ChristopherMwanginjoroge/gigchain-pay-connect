@@ -1,10 +1,13 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Play, ArrowDownRight, Clock, AlertCircle, CheckCircle2, Phone } from "lucide-react";
+import { ArrowRight, Clock, AlertCircle, CheckCircle2, Phone } from "lucide-react";
 import narrativeSender from "@/assets/narrative-sender.png";
 import narrativeTransit from "@/assets/narrative-transit.png";
 import humanStruggle from "@/assets/human-struggle.png";
+import { useAuthModal } from "@/components/auth/AuthModalProvider";
 
 const HeroSection = () => {
+  const { openAuthModal } = useAuthModal();
+
   return (
     <section className="relative min-h-screen bg-background overflow-hidden selection:bg-accent/20">
       {/* Background decorative elements - polished */}
@@ -26,6 +29,15 @@ const HeroSection = () => {
             <p className="text-lg md:text-xl text-primary/60 font-medium leading-[1.4] mb-6">
               Your phone number is your universal ID for money. Receive, send, and grow your wealth instantly—without the delays or high fees of legacy systems.
             </p>
+            <div className="flex flex-wrap items-center justify-center gap-3 mb-6">
+              <Button onClick={openAuthModal} className="rounded-xl px-8">
+                Getting Started
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+              <Button variant="outline" className="rounded-xl px-8">
+                Download App
+              </Button>
+            </div>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
               <div className="flex items-center gap-2 px-4 py-2 bg-accent/10 rounded-full border border-accent/20">
                 <Phone className="w-4 h-4 text-accent" />
