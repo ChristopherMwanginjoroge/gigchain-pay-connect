@@ -1,8 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
+import { useAuthModal } from "@/components/auth/AuthModalProvider";
 
 const Navbar = () => {
     const [scrolled, setScrolled] = useState(false);
+    const { openAuthModal } = useAuthModal();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -39,9 +41,18 @@ const Navbar = () => {
                         <a href="#features" className="text-primary/60 hover:text-primary transition-colors text-sm font-medium">Network</a>
                     </div>
 
-                    <Button size="sm" className="rounded-xl px-6 bg-primary font-semibold hover:shadow-glow transition-all">
-                        Download App
-                    </Button>
+                    <div className="flex items-center gap-2">
+                        <Button size="sm" variant="outline" className="rounded-xl px-4 font-semibold">
+                            Download App
+                        </Button>
+                        <Button
+                            size="sm"
+                            className="rounded-xl px-6 bg-primary font-semibold hover:shadow-glow transition-all"
+                            onClick={openAuthModal}
+                        >
+                            Getting Started
+                        </Button>
+                    </div>
                 </div>
             </div>
         </nav>
