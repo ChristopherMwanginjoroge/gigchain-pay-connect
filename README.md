@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # GigPay | Get Paid and Transact Globally
 
 GigPay is a high-performance, non-custodial global payment rail built for the future of finance. It allows users to receive, send, and grow their wealth instantly using just their phone number.
@@ -52,3 +53,6 @@ The project is structured with a component-based architecture in `src/components
 
 ---
 Built for the future of global transactions.
+=======
+
+>>>>>>> 4aa3d48a46cf5da241083c4d8e77adf2fa8f4b59
