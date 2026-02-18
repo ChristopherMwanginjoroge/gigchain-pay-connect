@@ -41,16 +41,17 @@ const Navbar = () => {
                         <a href="#benefits" className="text-primary/60 hover:text-primary transition-colors text-[11px] font-medium">Benefits</a>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                        <Button size="sm" variant="outline" className="rounded-lg px-3 py-1.5 text-[11px] font-semibold h-8">
+                    <div className="flex items-center gap-1.5 md:gap-2">
+                        <Button size="sm" variant="outline" className="rounded-lg px-2 md:px-3 py-1.5 text-[10px] md:text-[11px] font-semibold h-7 md:h-8 hidden sm:inline-flex">
                             Download App
                         </Button>
                         <Button
                             size="sm"
-                            className="rounded-lg px-4 py-1.5 text-[11px] bg-primary font-semibold hover:shadow-glow transition-all h-8"
+                            className="rounded-lg px-3 md:px-4 py-1.5 text-[10px] md:text-[11px] bg-primary font-semibold hover:shadow-glow transition-all h-7 md:h-8"
                             onClick={openAuthModal}
                         >
-                            Getting Started
+                            <span className="hidden sm:inline">Getting Started</span>
+                            <span className="sm:hidden">Start</span>
                         </Button>
                     </div>
                 </div>

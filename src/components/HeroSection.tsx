@@ -40,33 +40,33 @@ const HeroSection = () => {
         <div className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[120px] translate-y-1/3 -translate-x-1/4" />
       </div>
 
-      <div className="container relative z-10 py-8 px-6 lg:px-24 flex flex-col justify-between h-full max-w-[1400px] mx-auto">
+      <div className="container relative z-10 py-6 md:py-8 px-4 md:px-6 lg:px-24 flex flex-col justify-between h-full max-w-[1400px] mx-auto">
 
         {/* Top: Centered Content */}
-        <div className="w-full mt-8 lg:mt-12 animate-fade-up text-center px-4 lg:px-12">
-          <h1 className="text-[28px] md:text-[46px] lg:text-[70px] font-black text-primary leading-[1.1] mb-4 tracking-tighter">
+        <div className="w-full mt-6 md:mt-8 lg:mt-12 animate-fade-up text-center px-2 md:px-4 lg:px-12">
+          <h1 className="text-[24px] sm:text-[28px] md:text-[46px] lg:text-[70px] font-black text-primary leading-[1.1] mb-3 md:mb-4 tracking-tighter">
             Fast Global Payments.
           </h1>
-          <h2 className="text-accent italic text-[22px] md:text-[34px] lg:text-[46px] mb-8 tracking-tighter">
+          <h2 className="text-accent italic text-[18px] sm:text-[22px] md:text-[34px] lg:text-[46px] mb-6 md:mb-8 tracking-tighter">
             Near zero costs. Real independence.
           </h2>
           
-          <p className="text-primary/60 text-[14px] md:text-[16px] max-w-2xl mx-auto font-medium leading-relaxed">
+          <p className="text-primary/60 text-[13px] md:text-[14px] lg:text-[16px] max-w-2xl mx-auto font-medium leading-relaxed px-2">
             Send and receive money globally in seconds. Near zero costs, instant settlement, no delays.
           </p>
         </div>
 
         {/* Bottom Section: Right-Shifted Grouped Interactive Section */}
-        <div className="w-full max-w-[1100px] mx-auto grid lg:grid-cols-5 gap-10 items-center mb-10 lg:mb-12">
+        <div className="w-full max-w-[1100px] mx-auto grid lg:grid-cols-5 gap-6 md:gap-10 items-center mb-8 md:mb-10 lg:mb-12">
 
           {/* Left Columns (3/5): Right-Shifted CTAs */}
-          <div className="lg:col-span-3 animate-fade-up space-y-6 flex flex-col items-center lg:items-end lg:pr-12" style={{ animationDelay: '0.1s' }}>
-            <div className="flex flex-wrap items-center gap-4 justify-center lg:justify-end w-full">
-              <Button onClick={openAuthModal} className="rounded-2xl px-10 py-7 text-[14px] font-bold shadow-2xl shadow-primary/10 transition-all hover:-translate-y-1 whitespace-nowrap">
+          <div className="lg:col-span-3 animate-fade-up space-y-4 md:space-y-6 flex flex-col items-center lg:items-end lg:pr-12" style={{ animationDelay: '0.1s' }}>
+            <div className="flex flex-wrap items-center gap-3 md:gap-4 justify-center lg:justify-end w-full">
+              <Button onClick={openAuthModal} className="rounded-xl md:rounded-2xl px-6 md:px-10 py-5 md:py-7 text-[12px] md:text-[14px] font-bold shadow-2xl shadow-primary/10 transition-all hover:-translate-y-1 whitespace-nowrap">
                 Getting Started
-                <ArrowRight className="w-5 h-5 ml-2" />
+                <ArrowRight className="w-4 h-4 md:w-5 md:h-5 ml-1.5 md:ml-2" />
               </Button>
-              <Button variant="outline" className="rounded-2xl px-10 py-7 text-[14px] font-bold bg-white/50 backdrop-blur-sm border-primary/10 transition-all hover:-translate-y-1 whitespace-nowrap">
+              <Button variant="outline" className="rounded-xl md:rounded-2xl px-6 md:px-10 py-5 md:py-7 text-[12px] md:text-[14px] font-bold bg-white/50 backdrop-blur-sm border-primary/10 transition-all hover:-translate-y-1 whitespace-nowrap">
                 Download App
               </Button>
             </div>
