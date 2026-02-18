@@ -1,109 +1,146 @@
-import { Shield, Smartphone, Globe, ArrowRight, Zap, Target, Lock, Unlock } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Unlock, Zap, Smartphone } from "lucide-react";
 
 const ProblemSolution = () => {
-  return (
-    <section id="problem" className="py-24 lg:py-32 bg-white relative overflow-hidden">
-      {/* Decorative background blurs */}
-      <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2" />
-      <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-primary/2 rounded-full blur-[100px] translate-x-1/4 translate-y-1/4" />
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
 
-      <div className="container relative z-10">
-        <div className="max-w-4xl mx-auto">
-          {/* Centered Heading with Accent */}
-          <div className="text-center mb-20 animate-fade-up">
-            <div className="inline-block px-4 py-1.5 rounded-full bg-primary/5 text-primary text-[11px] font-bold uppercase tracking-wider mb-5 border border-primary/10">
-              The Reality of Global Money
-            </div>
-            <h2 className="text-4xl md:text-5xl font-bold text-primary mb-6 tracking-tight">
-              Absolute Financial <span className="text-accent italic">Independence.</span>
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // Toggle visibility state based on intersection
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+        } else {
+          // Reset when leaving the viewport to allow repetition
+          setIsVisible(false);
+        }
+      },
+      { threshold: 0.15 } // Trigger when 15% of the section is visible
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => {
+      if (sectionRef.current) {
+        observer.unobserve(sectionRef.current);
+      }
+    };
+  }, []);
+
+  return (
+    <section
+      id="problem"
+      ref={sectionRef}
+      className="relative h-screen min-h-[600px] flex items-center bg-white overflow-hidden"
+    >
+      {/* Decorative background blurs - subtle */}
+      <div className="absolute top-0 left-0 w-[400px] h-[400px] bg-primary/2 rounded-full blur-[100px] -translate-x-1/3 -translate-y-1/3" />
+      <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-primary/2 rounded-full blur-[100px] translate-x-1/3 translate-y-1/3" />
+
+      <div className="container relative z-10 py-4 max-w-5xl mx-auto">
+        <div className="w-full">
+          {/* Centered Heading - Pop-up Animation repeated on scroll */}
+          <div className={`text-center mb-12 lg:mb-20 transition-all duration-[1500ms] ${isVisible ? "animate-in fade-in zoom-in slide-in-from-bottom-8 opacity-100" : "opacity-0"
+            }`}>
+            <h2 className="text-2xl md:text-4xl lg:text-7xl font-black text-primary tracking-tighter whitespace-nowrap overflow-hidden text-ellipsis">
+              The Reality of <span className="text-accent italic font-black">Global Money.</span>
             </h2>
-            <p className="text-primary/60 text-lg md:text-xl font-medium max-w-2xl mx-auto leading-relaxed">
-              Old apps, centralized ramps, and banks are slow and expensive. We’ve removed the gates so you can move, own, and grow your money directly.
-            </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-12 lg:gap-20">
-            {/* The Problem - Legacy Dependencies */}
-            <div className="space-y-8 animate-fade-up" style={{ animationDelay: '0.1s' }}>
-              <div className="space-y-4">
-                <div className="inline-flex items-center gap-2 text-destructive font-bold text-sm uppercase tracking-widest">
-                  <div className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
+          <div className="grid md:grid-cols-2 gap-10 lg:gap-20 items-start max-w-5xl mx-auto">
+            {/* The Problem - Left-Fade Animation repeated on scroll */}
+            <div className={`space-y-6 transition-all duration-[1500ms] ${isVisible ? "animate-in fade-in slide-in-from-left-12 opacity-100" : "opacity-0"
+              }`}>
+              <div className="space-y-2">
+                <div className="inline-flex items-center gap-2 text-destructive font-black text-[11px] uppercase tracking-[0.3em]">
+                  <div className="w-1.5 h-1.5 rounded-full bg-destructive animate-pulse" />
                   Legacy Limitations
                 </div>
-                <h3 className="text-2xl font-bold text-primary tracking-tight">The Middleman Tax</h3>
-                <p className="text-primary/60 font-medium leading-relaxed text-sm">
-                  Whether it's bank wires or custodial apps (Payd, Yellow Card), you're losing 15% to hidden fees, "bridging" risks, and forced delays.
-                </p>
+                <h3 className="text-2xl lg:text-3xl font-black text-primary tracking-tighter leading-tight">The Middleman Tax</h3>
               </div>
 
-              <div className="grid gap-4">
+              <div className="grid gap-3">
                 {[
-                  { text: "7-15% total value loss", detail: "Hidden costs in every hop" },
-                  { text: "3-10 days to transact", detail: "Held by custodial middlemen" },
-                  { text: "Locked into their apps", detail: "They control your access" },
-                  { text: "Privacy and data risks", detail: "Dependent on legacy databases" }
+                  { text: "Up to 15% value loss", detail: "Hidden costs in every move" },
+                  { text: "Slow processing", detail: "Held by banks for days" },
+                  { text: "Limited control", detail: "Banks own your access" },
+                  { text: "Privacy risks", detail: "Third-party dependency" }
                 ].map((item, i) => (
-                  <div key={i} className="flex flex-col p-4 bg-black/5 rounded-2xl border border-black/5">
+                  <div
+                    key={i}
+                    className={`flex items-center justify-between p-3.5 bg-black/5 rounded-2xl border border-black/5 group hover:bg-black/[0.07] transition-all duration-300 ${isVisible ? "animate-in fade-in slide-in-from-left-8 opacity-100" : "opacity-0"
+                      } fill-mode-both`}
+                    style={{
+                      animationDelay: isVisible ? `${(i + 1) * 250}ms` : "0ms",
+                      animationDuration: '1200ms'
+                    }}
+                  >
                     <div className="flex items-center gap-3">
-                      <div className="w-1.5 h-1.5 rounded-full bg-destructive" />
-                      <span className="text-primary/70 text-sm font-bold">{item.text}</span>
+                      <div className="w-2 h-2 rounded-full bg-destructive" />
+                      <span className="text-primary/90 text-sm font-black uppercase tracking-wider">{item.text}</span>
                     </div>
-                    <span className="text-primary/30 text-[10px] font-medium ml-4.5">{item.detail}</span>
+                    <span className="text-primary/30 text-[10px] font-black uppercase tracking-widest hidden lg:block">{item.detail}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* The Solution - Direct Freedom */}
-            <div className="space-y-8 animate-fade-up" style={{ animationDelay: '0.2s' }}>
-              <div className="space-y-4">
-                <div className="inline-flex items-center gap-2 text-accent font-bold text-sm uppercase tracking-widest">
-                  <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-                  The GigChain Freedom
+            {/* The Solution - Staggered Fade Up repeated on scroll */}
+            <div className={`space-y-6 transition-all duration-[1500ms] ${isVisible ? "animate-in fade-in slide-in-from-right-12 opacity-100" : "opacity-0"
+              }`}>
+              <div className="space-y-2">
+                <div className="inline-flex items-center gap-2 text-accent font-black text-[11px] uppercase tracking-[0.3em]">
+                  <div className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+                  Financial Freedom
                 </div>
-                <h3 className="text-2xl font-bold text-primary tracking-tight">Your Identity is Your Edge.</h3>
-                <p className="text-primary/60 font-medium leading-relaxed text-sm">
-                  GigPay connects you directly to the network. No custodial gates, no bridging risks. Just your phone number and the fastest rails on earth.
-                </p>
+                <h3 className="text-2xl lg:text-3xl font-black text-primary tracking-tighter leading-tight">Direct Global Access.</h3>
               </div>
 
               <div className="grid gap-4">
-                <div className="flex items-center gap-4 p-5 bg-primary rounded-3xl border border-primary shadow-xl group hover:scale-105 transition-transform">
-                  <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
-                    <Unlock className="w-5 h-5 text-white" />
+                <div
+                  className={`flex items-center gap-5 p-5 bg-primary rounded-[2.5rem] border border-primary shadow-xl hover:scale-[1.02] transition-all cursor-default ${isVisible ? "animate-in fade-in slide-in-from-bottom-4 opacity-100" : "opacity-0"
+                    } duration-[1200ms] fill-mode-both`}
+                  style={{ animationDelay: isVisible ? '600ms' : "0ms" }}
+                >
+                  <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center shrink-0">
+                    <Unlock className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h4 className="text-white font-bold text-sm">Total Ownership</h4>
-                    <p className="text-white/40 text-[11px] font-medium leading-tight">No middlemen control your money.</p>
+                    <h4 className="text-white font-black text-sm uppercase tracking-wider">Full Control</h4>
+                    <p className="text-white/40 text-[10px] font-black uppercase tracking-widest leading-none mt-1">You own your money</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-4 p-5 bg-white rounded-3xl border border-border shadow-sm hover:shadow-md transition-all group">
-                  <div className="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-colors">
-                    <Zap className="w-5 h-5 text-primary" />
+                <div
+                  className={`flex items-center gap-5 p-5 bg-white rounded-[2.5rem] border border-border shadow-sm hover:shadow-md transition-all group cursor-default ${isVisible ? "animate-in fade-in slide-in-from-bottom-4 opacity-100" : "opacity-0"
+                    } duration-[1200ms] fill-mode-both`}
+                  style={{ animationDelay: isVisible ? '900ms' : "0ms" }}
+                >
+                  <div className="w-12 h-12 rounded-2xl bg-primary/5 flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-colors">
+                    <Zap className="w-6 h-6 text-primary" />
                   </div>
                   <div>
-                    <h4 className="text-primary font-bold text-sm">Near-Zero Costs</h4>
-                    <p className="text-primary/40 text-[11px] font-medium leading-tight">Cut fees from 15% to less than 2%.</p>
+                    <h4 className="text-primary font-black text-sm uppercase tracking-wider">Zero Costs</h4>
+                    <p className="text-primary/40 text-[10px] font-black uppercase tracking-widest leading-none mt-1">Fees under 1%</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-4 p-5 bg-white rounded-3xl border border-border shadow-sm hover:shadow-md transition-all group">
-                  <div className="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-colors">
-                    <Smartphone className="w-5 h-5 text-primary" />
+                <div
+                  className={`flex items-center gap-5 p-5 bg-white rounded-[2.5rem] border border-border shadow-sm hover:shadow-md transition-all group cursor-default ${isVisible ? "animate-in fade-in slide-in-from-bottom-4 opacity-100" : "opacity-0"
+                    } duration-[1200ms] fill-mode-both`}
+                  style={{ animationDelay: isVisible ? '1200ms' : "0ms" }}
+                >
+                  <div className="w-12 h-12 rounded-2xl bg-primary/5 flex items-center justify-center shrink-0 group-hover:bg-primary/10 transition-colors">
+                    <Smartphone className="w-6 h-6 text-primary" />
                   </div>
                   <div>
-                    <h4 className="text-primary font-bold text-sm">Universal Access</h4>
-                    <p className="text-primary/40 text-[11px] font-medium leading-tight">Transact globally with just a phone number.</p>
+                    <h4 className="text-primary font-black text-sm uppercase tracking-wider">Universal</h4>
+                    <p className="text-primary/40 text-[10px] font-black uppercase tracking-widest leading-none mt-1">Just a phone number</p>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-
-          {/* Comparison summary Footer */}
-          <div className="mt-20 p-8 bg-accent/5 rounded-[2.5rem] border border-accent/10 text-center animate-fade-up" style={{ animationDelay: '0.3s' }}>
-            <p className="text-primary/60 font-bold italic text-sm">
-              Bypass the limitations of legacy bank rails and centralized apps like Payd or Yellow Card.
-            </p>
           </div>
         </div>
       </div>
