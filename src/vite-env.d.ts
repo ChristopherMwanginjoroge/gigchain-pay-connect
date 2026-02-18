@@ -18,6 +18,14 @@ interface ImportMetaEnv {
   readonly VITE_COINBASE_ONRAMP_API_SECRET?: string;
   readonly VITE_YELLOW_CARD_HOSTED_URL?: string;
   readonly VITE_PAYCHANT_HOSTED_URL?: string;
+  readonly VITE_TRANSAK_API_KEY?: string;
+  readonly VITE_TRANSAK_ENVIRONMENT?: "STAGING" | "PRODUCTION";
+  readonly VITE_MOONPAY_API_KEY?: string;
+  readonly VITE_MOONPAY_ENVIRONMENT?: "sandbox" | "production";
+  // Solana configuration
+  readonly VITE_SOLANA_NETWORK?: "devnet" | "mainnet-beta" | "testnet";
+  readonly VITE_SOLANA_RPC_URL?: string;
+  readonly VITE_SOLANA_USDC_MINT?: string;
   readonly EXPO_PUBLIC_SUPABASE_URL?: string;
   readonly EXPO_PUBLIC_SUPABASE_KEY?: string;
   readonly EXPO_PUBLIC_ENV?: string;

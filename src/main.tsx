@@ -1,3 +1,6 @@
+// Polyfills must be imported first, before any other imports
+import "./polyfills";
+
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";

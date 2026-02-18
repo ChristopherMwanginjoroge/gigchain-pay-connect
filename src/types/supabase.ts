@@ -18,11 +18,18 @@ export interface Profile {
   country_code: string | null;
   created_at: string;
   updated_at: string;
+  // Hedera wallet
   hedera_account_id: string | null;
   hedera_public_key: string | null;
+  // Solana wallet
+  solana_address: string | null;
+  solana_public_key: string | null;
+  // Wallet metadata
   wallet_created_at: string | null;
   usdc_associated: boolean;
   usdc_prompt_dismissed: boolean;
+  // Preferred network for deposits/payments
+  preferred_network: "hedera" | "solana" | null;
 }
 
 export interface KycRecord {
