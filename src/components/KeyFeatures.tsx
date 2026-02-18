@@ -3,28 +3,28 @@ import { ArrowRight } from "lucide-react";
 
 const features = [
   {
-    title: "Instant Transactions",
-    description: "Move money globally in 3-5 seconds. No more bank holidays, no more waiting days for settlement.",
+    title: "Non-Custodial Wallet",
+    description: "Your private keys are stored on your device. You control your funds. Pay by sharing your phone number—no seed phrases.",
   },
   {
-    title: "Advanced AI Security",
-    description: "Automatic fraud detection and AI scoring tuned for modern risks—keeping your money and identity safe.",
+    title: "Near-Zero Fees & Instant",
+    description: "$0.0001-$0.001 fees and 0.4-5 second finality on Hedera/Solana. Cut total payout costs to under 2%.",
   },
   {
-    title: "Reliable Network",
-    description: "Built on high-performance infrastructure trusted by global leaders. Secure and always active.",
+    title: "Stablecoin + Yield",
+    description: "Hold value in USDC to avoid currency swings. Optional yield of 4-8% APY on idle balances.",
   },
   {
-    title: "Automatic Yield",
-    description: "Earn 4-8% yearly on your digital assets automatically. Your money works for you while you carry on with your day.",
+    title: "Multi-Chain Choice",
+    description: "Choose Hedera (lowest fees) or Solana (speed + Coinbase integration).",
   },
   {
-    title: "Secure & Compliant",
-    description: "Fully aligned with global standards while remaining accessible to everyone, everywhere.",
+    title: "Built for Gig Workers",
+    description: "Phone-linked invoices, planned escrow, and fraud protection built for freelancers.",
   },
   {
-    title: "Universal ID",
-    description: "Your phone number is your key. No complex crypto addresses or bank account codes needed to transact.",
+    title: "Africa-First, US Tech",
+    description: "Kenya-first UX with global rails (Circle USDC, Coinbase ramps, Hedera/Solana).",
   },
 ];
 
@@ -59,22 +59,19 @@ const KeyFeatures = () => {
     <section
       id="features"
       ref={sectionRef}
-      className="py-24 lg:py-32 bg-background relative overflow-hidden"
+      className="py-16 lg:py-20 bg-background relative overflow-hidden -mt-px"
+      style={{ perspective: '1000px' }}
     >
       {/* Subtle background glow */}
       <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-primary/5 rounded-full blur-[100px] -translate-y-1/2" />
 
-      <div className="container relative z-10">
-        <div className={`text-center mb-16 transition-all duration-[1500ms] ${isVisible ? "animate-in fade-in zoom-in slide-in-from-bottom-8 opacity-100" : "opacity-0"
-          }`}>
-          <div className="inline-block px-4 py-1.5 rounded-full bg-primary/5 text-primary text-[11px] font-black uppercase tracking-wider mb-5 border border-primary/10">
-            Platform Benefits
-          </div>
-          <h2 className="text-4xl md:text-5xl font-black text-primary mb-6 tracking-tight uppercase">
-            Transact with Total Confidence.
+      <div className="container relative z-10" style={{ transformStyle: 'preserve-3d' }}>
+        <div className="text-center mb-16 pt-4">
+          <h2 className="text-[38px] md:text-[52px] lg:text-[60px] font-black text-primary mb-6 tracking-tight uppercase">
+            Why GigPay Wins.
           </h2>
-          <p className="text-primary/60 text-lg md:text-xl max-w-2xl mx-auto font-medium">
-            Professional tools for everyone. Get the power of a global bank directly on your phone.
+          <p className="text-primary/60 text-[17px] md:text-[19px] lg:text-[20px] max-w-3xl mx-auto font-medium leading-relaxed">
+            Non-custodial. Phone-number simple. Near-zero fees. Instant settlement. Stable USDC.
           </p>
         </div>
 
@@ -82,16 +79,11 @@ const KeyFeatures = () => {
           {features.map((feature, index) => (
             <div
               key={feature.title}
-              className={`relative bg-white rounded-3xl p-8 border border-border shadow-sm transition-all duration-[1200ms] overflow-hidden ${isVisible ? "animate-in fade-in slide-in-from-bottom-8 opacity-100" : "opacity-0"
-                } fill-mode-both`}
-              style={{
-                animationDelay: isVisible ? `${index * 200}ms` : "0ms",
-                animationDuration: '1200ms'
-              }}
+              className="relative bg-white rounded-3xl p-8 border border-border/50 shadow-sm transition-all overflow-hidden"
             >
               <div className="relative">
-                <h3 className="text-lg font-black text-primary mb-3 tracking-tighter uppercase">{feature.title}</h3>
-                <p className="text-primary/60 text-xs font-medium leading-relaxed transition-colors">{feature.description}</p>
+                <h3 className="text-[16px] font-black text-primary mb-3 tracking-tighter uppercase">{feature.title}</h3>
+                <p className="text-primary/60 text-[10px] font-medium leading-relaxed transition-colors">{feature.description}</p>
               </div>
             </div>
           ))}
