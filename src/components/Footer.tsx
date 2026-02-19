@@ -23,11 +23,11 @@ const Footer = () => {
       <div className="container relative z-10 py-20 lg:py-32">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <div className="animate-fade-up">
-            <h2 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight leading-[1.1]">
+            <h2 className="text-[34px] md:text-[46px] font-bold mb-6 tracking-tight leading-[1.1]">
               Engineered for the <br />
               <span className="text-accent underline decoration-accent/30 underline-offset-8">Global Frontier.</span>
             </h2>
-            <p className="text-white/60 text-lg font-medium max-w-lg">
+            <p className="text-white/60 text-[16px] font-medium max-w-lg">
               Join 2,400+ developers and companies building the future of cross-border settlements.
             </p>
           </div>
@@ -53,17 +53,17 @@ const Footer = () => {
               </form>
             ) : (
               <div className="bg-white/10 border border-white/20 p-8 rounded-2xl animate-fade-in">
-                <p className="text-white/60 font-bold uppercase tracking-[0.2em] text-xs mb-2">ACCESS_PENDING</p>
-                <p className="text-white font-bold text-lg italic">Welcome to the priority list.</p>
+                <p className="text-white/60 font-bold uppercase tracking-[0.2em] text-[10px] mb-2">ACCESS_PENDING</p>
+                <p className="text-white font-bold text-[16px] italic">Welcome to the priority list.</p>
               </div>
             )}
 
             <div className="mt-8 flex items-center gap-6">
-              <div className="flex items-center gap-2 text-white/40 text-[10px] font-bold uppercase tracking-[0.2em]">
+              <div className="flex items-center gap-2 text-white/40 text-[9px] font-bold uppercase tracking-[0.2em]">
                 <Shield className="w-4 h-4" />
                 <span>Bank-Grade Integrity</span>
               </div>
-              <div className="flex items-center gap-2 text-white/40 text-[10px] font-bold uppercase tracking-[0.2em]">
+              <div className="flex items-center gap-2 text-white/40 text-[9px] font-bold uppercase tracking-[0.2em]">
                 <FileText className="w-4 h-4" />
                 <span>Circle Regulated</span>
               </div>
@@ -72,15 +72,15 @@ const Footer = () => {
         </div>
 
         {/* Brand & Links */}
-        <div className="mt-24 pt-16 border-t border-white/10 grid md:grid-cols-4 lg:grid-cols-5 gap-12">
+        <div className="mt-24 pt-16 border-t border-white/5 grid md:grid-cols-4 lg:grid-cols-5 gap-12">
           <div className="md:col-span-2">
             <div className="flex items-center gap-3 mb-8">
               <div className="w-10 h-10 bg-white flex items-center justify-center rounded-xl">
-                <span className="text-primary font-bold text-lg">GP</span>
+                <span className="text-primary font-bold text-[17px]">GP</span>
               </div>
-              <span className="text-2xl font-bold tracking-tight">GigPay</span>
+              <span className="text-[22px] font-bold tracking-tight">GigPay</span>
             </div>
-            <p className="text-white/40 text-sm font-medium leading-relaxed max-w-xs mb-8">
+            <p className="text-white/40 text-[12px] font-medium leading-relaxed max-w-xs mb-8">
               The high-performance settlement layer for the global economy. Built on the integrity of the Hedera network.
             </p>
             <div className="flex items-center gap-4">
@@ -100,43 +100,43 @@ const Footer = () => {
           </div>
 
           <div>
-            <h4 className="font-bold text-white mb-6 uppercase tracking-widest text-[11px]">Protocol</h4>
+            <h4 className="font-bold text-white mb-6 uppercase tracking-widest text-[9px]">Protocol</h4>
             <ul className="space-y-4">
-              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-sm font-medium">Liquidity Pool</a></li>
-              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-sm font-medium">Network Status</a></li>
-              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-sm font-medium">Hedera Token Svc</a></li>
-              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-sm font-medium">Governance</a></li>
+              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-[12px] font-medium">Liquidity Pool</a></li>
+              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-[12px] font-medium">Network Status</a></li>
+              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-[12px] font-medium">Hedera Token Svc</a></li>
+              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-[12px] font-medium">Governance</a></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="font-bold text-white mb-6 uppercase tracking-widest text-[11px]">Resources</h4>
+            <h4 className="font-bold text-white mb-6 uppercase tracking-widest text-[9px]">Resources</h4>
             <ul className="space-y-4">
-              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-sm font-medium">Documentation</a></li>
-              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-sm font-medium">Integrations</a></li>
-              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-sm font-medium">Security Audit</a></li>
-              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-sm font-medium">Ecosystem</a></li>
+              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-[12px] font-medium">Documentation</a></li>
+              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-[12px] font-medium">Integrations</a></li>
+              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-[12px] font-medium">Security Audit</a></li>
+              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-[12px] font-medium">Ecosystem</a></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="font-bold text-white mb-6 uppercase tracking-widest text-[11px]">Company</h4>
+            <h4 className="font-bold text-white mb-6 uppercase tracking-widest text-[9px]">Company</h4>
             <ul className="space-y-4">
-              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-sm font-medium">About</a></li>
-              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-sm font-medium">Terms</a></li>
-              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-sm font-medium">Privacy</a></li>
-              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-sm font-medium">Contact</a></li>
+              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-[12px] font-medium">About</a></li>
+              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-[12px] font-medium">Terms</a></li>
+              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-[12px] font-medium">Privacy</a></li>
+              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-[12px] font-medium">Contact</a></li>
             </ul>
           </div>
         </div>
 
-        <div className="mt-24 pb-12 border-t border-white/10 pt-12 flex flex-col md:flex-row items-center justify-between gap-6">
-          <p className="text-white/20 text-xs font-medium tracking-tight">
+        <div className="mt-24 pb-12 border-t border-white/5 pt-12 flex flex-col md:flex-row items-center justify-between gap-6">
+          <p className="text-white/20 text-[11px] font-medium tracking-tight">
             © 2026 GIGPAY NETWORK. ALL RIGHTS RESERVED.
           </p>
           <div className="flex gap-8">
-            <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em]">HEDERA_ECOSYSTEM</span>
-            <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em]">USDC_COMPLIANT</span>
+            <span className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em]">HEDERA_ECOSYSTEM</span>
+            <span className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em]">USDC_COMPLIANT</span>
           </div>
         </div>
       </div>
