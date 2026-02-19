@@ -28,12 +28,16 @@ import {
   isCoinbaseConfigured,
   countryByFiat,
 } from "@/lib/onramp/coinbase";
+import {
+  buildPaycrestCheckoutUrl,
+  isPaycrestConfigured,
+} from "@/lib/onramp/paycrest";
 
 // Supported blockchain networks
 type NetworkType = "hedera" | "solana";
 
 // Provider depends on network
-type DepositProvider = "moonpay" | "coinbase" | "yellow_card" | "paychant";
+type DepositProvider = "moonpay" | "coinbase" | "paycrest";
 
 const networkLabels: Record<NetworkType, string> = {
   hedera: "Hedera",
@@ -47,15 +51,14 @@ const networkDescriptions: Record<NetworkType, string> = {
 
 // Providers available per network
 const providersByNetwork: Record<NetworkType, DepositProvider[]> = {
-  hedera: ["moonpay", "yellow_card", "paychant"],
-  solana: ["coinbase", "yellow_card", "paychant"],
+  hedera: ["moonpay", "paycrest"],
+  solana: ["coinbase", "paycrest"],
 };
 
 const providerLabels: Record<DepositProvider, string> = {
   moonpay: "MoonPay (Card/Bank → USDC)",
   coinbase: "Coinbase (Card/Bank → USDC)",
-  yellow_card: "Yellow Card Hosted Checkout",
-  paychant: "Paychant Hosted Checkout",
+  paycrest: "Paycrest (Mobile Money → USDC)",
 };
 
 const fiatByCountryCode: Record<string, string> = {
@@ -406,8 +409,31 @@ const Deposit = () => {
         return;
       }
 
-      const hostedBaseUrl =
-        provider === "yellow_card" ? import.meta.env.VITE_YELLOW_CARD_HOSTED_URL : import.meta.env.VITE_PAYCHANT_HOSTED_URL;
+      if (provider === "paycrest") {
+        // Paycrest for African mobile money
+        const paycrestUrl = buildPaycrestCheckoutUrl({
+          walletAddress: activeWalletAddress!,
+          network: selectedNetwork,
+          cryptoCurrency: "USDC",
+          fiatCurrency,
+          fiatAmount: numericAmount,
+          phone: profile.phone ?? "",
+          email: profile.email ?? "",
+          partnerReference: transaction.id,
+        });
+        window.open(paycrestUrl, "_blank", "noopener,noreferrer");
+        setMonitorState({
+          baselineUsdc,
+          startedAt: Date.now(),
+          transactionId: transaction.id,
+          provider,
+        });
+        toast.success(`${providerLabels[provider]} launched. Monitoring wallet for incoming USDC.`);
+        return;
+      }
+
+      // Legacy hosted provider fallback
+      const hostedBaseUrl = import.meta.env.VITE_PAYCREST_HOSTED_URL;
       if (!hostedBaseUrl) {
         throw new Error(`Missing hosted checkout URL for ${provider}. Configure env and retry.`);
       }

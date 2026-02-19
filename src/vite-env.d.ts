@@ -16,8 +16,11 @@ interface ImportMetaEnv {
   readonly VITE_COINBASE_ONRAMP_API_BASE_URL?: string;
   readonly VITE_COINBASE_ONRAMP_API_KEY?: string;
   readonly VITE_COINBASE_ONRAMP_API_SECRET?: string;
-  readonly VITE_YELLOW_CARD_HOSTED_URL?: string;
-  readonly VITE_PAYCHANT_HOSTED_URL?: string;
+  readonly VITE_COINBASE_ONRAMP_APP_ID?: string;
+  readonly VITE_PAYCREST_API_KEY?: string;
+  readonly VITE_PAYCREST_API_SECRET?: string;
+  readonly VITE_PAYCREST_BASE_URL?: string;
+  readonly VITE_PAYCREST_HOSTED_URL?: string;
   readonly VITE_TRANSAK_API_KEY?: string;
   readonly VITE_TRANSAK_ENVIRONMENT?: "STAGING" | "PRODUCTION";
   readonly VITE_MOONPAY_API_KEY?: string;
