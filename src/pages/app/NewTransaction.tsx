@@ -38,7 +38,7 @@ const targetTypeOptions: Record<TxValues["flow"], Array<{ value: string; label: 
   ],
   deposit: [
     { value: "coinbase", label: "Coinbase On-ramp" },
-    { value: "yellow_card", label: "Yellow Card" },
+    { value: "paycrest", label: "Paycrest (Mobile Money)" },
     { value: "bank_card", label: "Card / Apple Pay" },
     { value: "bank_account", label: "Linked Bank Account" },
   ],

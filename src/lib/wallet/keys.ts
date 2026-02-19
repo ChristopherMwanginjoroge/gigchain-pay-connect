@@ -1,11 +1,17 @@
 import { createWalletKeypair } from "@/lib/hedera/client";
+import { Keypair } from "@solana/web3.js";
+import bs58 from "bs58";
 
 const KEY_STORAGE_PREFIX = "gigpay.wallet.encrypted";
-const KEY_VAULT_VERSION = 1;
+const KEY_VAULT_VERSION = 2; // Updated for multi-chain support
 const PBKDF2_ITERATIONS = 250_000;
 const VAULT_DB_NAME = "gigpay.wallet.db";
 const VAULT_STORE_NAME = "vaults";
 
+/**
+ * Multi-chain encrypted key vault
+ * Stores both Hedera and Solana keys encrypted with user passphrase
+ */
 export interface EncryptedKeyVault {
   version: number;
   algorithm: "AES-GCM";
@@ -14,8 +20,43 @@ export interface EncryptedKeyVault {
   salt: string;
   iv: string;
   ciphertext: string;
+  // Hedera keys (legacy format for backwards compatibility)
   publicKey: string;
+  // Multi-chain public keys (new format)
+  hederaPublicKey?: string;
+  solanaAddress?: string;
+  solanaPublicKey?: string;
   createdAt: string;
+}
+
+/**
+ * Multi-chain key material returned after generation
+ */
+export interface MultiChainKeyMaterial {
+  hedera: {
+    privateKey: string;
+    publicKey: string;
+  };
+  solana: {
+    privateKey: string; // Base58 encoded
+    publicKey: string;  // Base58 encoded (same as address)
+    address: string;    // Base58 encoded public key
+  };
+}
+
+/**
+ * Decrypted key material from vault
+ */
+export interface DecryptedKeyMaterial {
+  hedera?: {
+    privateKey: string;
+    publicKey: string;
+  };
+  solana?: {
+    privateKey: string;
+    publicKey: string;
+    address: string;
+  };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -42,9 +83,11 @@ function assertEncryptedVaultShape(value: unknown): asserts value is EncryptedKe
   if (!hasString(value.salt) || !hasString(value.iv) || !hasString(value.ciphertext)) {
     throw new Error("Recovery file is missing encrypted key fields.");
   }
+  // publicKey is required for backwards compatibility (Hedera)
   if (!hasString(value.publicKey) || !hasString(value.createdAt)) {
     throw new Error("Recovery file is missing wallet metadata.");
   }
+  // v2+ vaults may have solanaAddress but it's optional for migration
 }
 
 function toBase64(input: ArrayBuffer | Uint8Array) {
@@ -153,10 +196,94 @@ async function idbDelete(userId: string) {
   db.close();
 }
 
-export async function generateWalletKeyMaterial() {
+/**
+ * Generate Solana keypair
+ */
+export function generateSolanaKeypair(): { privateKey: string; publicKey: string; address: string } {
+  const keypair = Keypair.generate();
+  const privateKey = bs58.encode(keypair.secretKey);
+  const publicKey = keypair.publicKey.toBase58();
+  
+  return {
+    privateKey,
+    publicKey,
+    address: publicKey, // On Solana, address = public key
+  };
+}
+
+/**
+ * Generate multi-chain wallet key material (Hedera + Solana)
+ */
+export async function generateWalletKeyMaterial(): Promise<MultiChainKeyMaterial> {
+  // Generate Hedera keypair (ED25519)
+  const hederaKeys = await createWalletKeypair();
+  
+  // Generate Solana keypair (ED25519)
+  const solanaKeys = generateSolanaKeypair();
+  
+  return {
+    hedera: {
+      privateKey: hederaKeys.privateKey,
+      publicKey: hederaKeys.publicKey,
+    },
+    solana: solanaKeys,
+  };
+}
+
+/**
+ * Legacy function for Hedera-only key generation (backwards compatibility)
+ */
+export async function generateHederaKeyMaterial() {
   return createWalletKeypair();
 }
 
+/**
+ * Encrypt multi-chain private keys into a single vault
+ */
+export async function encryptPrivateKeys(
+  keys: MultiChainKeyMaterial, 
+  passphrase: string
+): Promise<EncryptedKeyVault> {
+  if (!passphrase.trim()) {
+    throw new Error("Passphrase is required.");
+  }
+
+  // Combine keys into a JSON structure for encryption
+  const keysJson = JSON.stringify({
+    hedera: keys.hedera.privateKey,
+    solana: keys.solana.privateKey,
+  });
+
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const derivedKey = await deriveAesKey(passphrase, salt);
+  const ciphertext = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv },
+    derivedKey,
+    new TextEncoder().encode(keysJson),
+  );
+
+  return {
+    version: KEY_VAULT_VERSION,
+    algorithm: "AES-GCM",
+    kdf: "PBKDF2-SHA256",
+    iterations: PBKDF2_ITERATIONS,
+    salt: toBase64(salt),
+    iv: toBase64(iv),
+    ciphertext: toBase64(ciphertext),
+    // Legacy field for backwards compatibility
+    publicKey: keys.hedera.publicKey,
+    // New multi-chain fields
+    hederaPublicKey: keys.hedera.publicKey,
+    solanaAddress: keys.solana.address,
+    solanaPublicKey: keys.solana.publicKey,
+    createdAt: new Date().toISOString(),
+  };
+}
+
+/**
+ * Legacy single-key encryption (backwards compatibility)
+ */
 export async function encryptPrivateKey(privateKey: string, publicKey: string, passphrase: string): Promise<EncryptedKeyVault> {
   if (!passphrase.trim()) {
     throw new Error("Passphrase is required.");
@@ -172,7 +299,7 @@ export async function encryptPrivateKey(privateKey: string, publicKey: string, p
   );
 
   return {
-    version: KEY_VAULT_VERSION,
+    version: 1, // Legacy version
     algorithm: "AES-GCM",
     kdf: "PBKDF2-SHA256",
     iterations: PBKDF2_ITERATIONS,
@@ -184,6 +311,65 @@ export async function encryptPrivateKey(privateKey: string, publicKey: string, p
   };
 }
 
+/**
+ * Decrypt multi-chain private keys from vault
+ */
+export async function decryptPrivateKeys(vault: EncryptedKeyVault, passphrase: string): Promise<DecryptedKeyMaterial> {
+  const key = await deriveAesKey(passphrase, fromBase64(vault.salt));
+  try {
+    const decrypted = await crypto.subtle.decrypt(
+      {
+        name: "AES-GCM",
+        iv: fromBase64(vault.iv),
+      },
+      key,
+      fromBase64(vault.ciphertext),
+    );
+    
+    const decryptedText = new TextDecoder().decode(decrypted);
+    
+    // Check if this is a v2 multi-chain vault (JSON with hedera/solana keys)
+    if (vault.version >= 2) {
+      try {
+        const keys = JSON.parse(decryptedText) as { hedera?: string; solana?: string };
+        const result: DecryptedKeyMaterial = {};
+        
+        if (keys.hedera) {
+          result.hedera = {
+            privateKey: keys.hedera,
+            publicKey: vault.hederaPublicKey || vault.publicKey,
+          };
+        }
+        
+        if (keys.solana && vault.solanaAddress) {
+          result.solana = {
+            privateKey: keys.solana,
+            publicKey: vault.solanaPublicKey || vault.solanaAddress,
+            address: vault.solanaAddress,
+          };
+        }
+        
+        return result;
+      } catch {
+        // If JSON parsing fails, treat as legacy single key
+      }
+    }
+    
+    // Legacy v1 vault - single Hedera key
+    return {
+      hedera: {
+        privateKey: decryptedText,
+        publicKey: vault.publicKey,
+      },
+    };
+  } catch {
+    throw new Error("Invalid passphrase or corrupted recovery file.");
+  }
+}
+
+/**
+ * Legacy single-key decryption (backwards compatibility)
+ */
 export async function decryptPrivateKey(vault: EncryptedKeyVault, passphrase: string): Promise<string> {
   const key = await deriveAesKey(passphrase, fromBase64(vault.salt));
   try {

@@ -1,6 +1,6 @@
 import { ChangeEvent, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowDownLeft, ArrowUpRight, CheckCircle2, KeyRound, QrCode, ShieldCheck, Wallet } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, CheckCircle2, KeyRound, QrCode, ShieldCheck, Wallet, Globe } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,18 +10,22 @@ import { useProfileQuery, useUpdateProfileMutation } from "@/lib/api/profile";
 import { useTransactionsQuery } from "@/lib/api/transactions";
 import { useWalletBalanceQuery } from "@/lib/api/wallet";
 import { useHederaOverviewQuery, useHederaTokenBalancesQuery } from "@/lib/api/hedera";
+import { useSolanaWalletData } from "@/lib/api/solana";
 import {
   assertDevOperatorEnabled,
   associateUsdc,
   createAccountFromPublicKey,
 } from "@/lib/hedera/client";
 import { HEDERA_IS_DEV, HEDERA_USDC_TOKEN_ID } from "@/lib/hedera/config";
+import { SOLANA_NETWORK, getSolanaNetworkDisplay } from "@/lib/solana/config";
 import { getAccountOverview, isTokenAssociated } from "@/lib/hedera/mirror";
 import { useAuth } from "@/lib/auth/AuthProvider";
 import {
   decryptPrivateKey,
+  decryptPrivateKeys,
   downloadRecoveryFile,
   encryptPrivateKey,
+  encryptPrivateKeys,
   generateWalletKeyMaterial,
   loadEncryptedKeyVault,
   parseRecoveryJson,
@@ -59,13 +63,24 @@ const Dashboard = () => {
   const updateProfileMutation = useUpdateProfileMutation();
 
   const profile = profileQuery.data;
+  
+  // Hedera wallet info
   const linkedAccountFromProfile = profile?.hedera_account_id?.trim() || null;
   const linkedAccountFromWallet = walletQuery.data?.hedera_account_id?.trim() || null;
   const effectiveAccountId = linkedAccountFromProfile || linkedAccountFromWallet;
   const hasLinkedWallet = !!effectiveAccountId;
+  
+  // Solana wallet info
+  const solanaAddress = profile?.solana_address?.trim() || null;
+  const hasSolanaWallet = !!solanaAddress;
+  const hasAnyWallet = hasLinkedWallet || hasSolanaWallet;
 
+  // Hedera queries
   const hederaOverviewQuery = useHederaOverviewQuery(effectiveAccountId);
   const hederaTokensQuery = useHederaTokenBalancesQuery(effectiveAccountId);
+  
+  // Solana queries
+  const solanaWalletQuery = useSolanaWalletData(solanaAddress || undefined);
 
   const [setupStatus, setSetupStatus] = useState<WalletSetupStatus>("ready_to_create");
   const [passphrase, setPassphrase] = useState("");
@@ -88,6 +103,11 @@ const Dashboard = () => {
   const hasMirrorUsdcData = hederaTokensQuery.isSuccess;
   const balance = hasMirrorUsdcData ? mirrorUsdcBalance : ledgerUsdcBalance;
   const balanceSource = hasMirrorUsdcData ? "Hedera mirror" : "Supabase ledger fallback";
+  
+  // Combined USDC balance from both networks
+  const solanaUsdcBalance = solanaWalletQuery.balances?.usdc?.amount ?? 0;
+  const totalUsdcBalance = mirrorUsdcBalance + solanaUsdcBalance;
+  
   const hasSubmittedKyc = !!kycQuery.data?.length;
   const effectiveUsdcAssociated = Boolean(profile?.usdc_associated) || Boolean(usdcTokenBalance);
   const hasHbarBalance = Number(hederaOverviewQuery.data?.balanceHbar ?? 0) > 0;
@@ -161,24 +181,31 @@ const Dashboard = () => {
     setSetupStatus("creating");
     try {
       await assertDevOperatorEnabled();
-      const keypair = await generateWalletKeyMaterial();
-      const vault = await encryptPrivateKey(keypair.privateKey, keypair.publicKey, passphrase);
+      
+      // Generate multi-chain keypairs (Hedera + Solana)
+      const multiChainKeys = await generateWalletKeyMaterial();
+      
+      // Encrypt and store the multi-chain vault (v2 format)
+      const vault = await encryptPrivateKeys(multiChainKeys, passphrase);
       await storeEncryptedKeyVault(user.id, vault);
       setLocalVault(vault);
       downloadRecoveryFile(user.id, vault);
 
-      const accountCreation = await createAccountFromPublicKey(keypair.publicKey);
+      // Create Hedera account from public key
+      const accountCreation = await createAccountFromPublicKey(multiChainKeys.hedera.publicKey);
       setCreateTxId(accountCreation.txId);
 
       await updateProfileMutation.mutateAsync({
         hedera_account_id: accountCreation.accountId,
-        hedera_public_key: keypair.publicKey,
+        hedera_public_key: multiChainKeys.hedera.publicKey,
+        solana_address: multiChainKeys.solana.address,
+        solana_public_key: multiChainKeys.solana.publicKey,
         wallet_created_at: new Date().toISOString(),
         usdc_associated: false,
       });
 
       setSetupStatus("created");
-      toast.success("Wallet created. Add some HBAR, then run USDC association.");
+      toast.success("Multi-chain wallet created (Hedera + Solana). Add HBAR for USDC association.");
     } catch (error) {
       setSetupStatus("ready_to_create");
       toast.error(error instanceof Error ? error.message : "Wallet creation failed.");
@@ -233,8 +260,9 @@ const Dashboard = () => {
         toast.error("Add some HBAR to this wallet first, then retry USDC association.");
         return;
       }
-      const privateKey = await decryptPrivateKey(vault, passphrase);
-      await associateWithRetry(effectiveAccountId, privateKey);
+      // Decrypt private keys - handles both v1 (single key) and v2 (multi-chain) vaults
+      const decrypted = await decryptPrivateKeys(vault, passphrase);
+      await associateWithRetry(effectiveAccountId, decrypted.hedera.privateKey);
       setSetupStatus("created");
       toast.success("USDC association completed.");
     } catch (error) {
@@ -287,22 +315,24 @@ const Dashboard = () => {
     <div className="space-y-6 pb-24 md:pb-6">
       <section className="app-screen rounded-3xl p-5 md:p-7">
         <div className="flex items-center justify-between gap-4">
-          <p className="text-xs uppercase tracking-[0.28em] text-cyan-100/65">Hedera Testnet Dashboard</p>
+          <p className="text-xs uppercase tracking-[0.28em] text-cyan-100/65">Multi-Chain Dashboard</p>
           <span className="app-chip inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold">
             <ShieldCheck className="h-4 w-4" />
-            {HEDERA_IS_DEV ? "DEV ONLY" : "DISABLED OUTSIDE DEV"}
+            {HEDERA_IS_DEV ? "TESTNET/DEVNET" : "MAINNET"}
           </span>
         </div>
         <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="text-sm text-cyan-100/70">Total Balance</p>
-            <h1 className="text-4xl font-bold tracking-tight text-cyan-50">{formatAmount(String(balance))} USDC</h1>
-            <p className="mt-1 text-sm text-emerald-200/90">≈ {Math.round(balance * KES_RATE).toLocaleString()} KES</p>
-            <p className="mt-1 text-xs text-cyan-100/60">Source: {balanceSource}</p>
+            <p className="text-sm text-cyan-100/70">Total USDC Balance</p>
+            <h1 className="text-4xl font-bold tracking-tight text-cyan-50">{formatAmount(String(totalUsdcBalance))} USDC</h1>
+            <p className="mt-1 text-sm text-emerald-200/90">≈ {Math.round(totalUsdcBalance * KES_RATE).toLocaleString()} KES</p>
+            <p className="mt-1 text-xs text-cyan-100/60">
+              Hedera: {mirrorUsdcBalance.toFixed(2)} | Solana: {solanaUsdcBalance.toFixed(2)}
+            </p>
           </div>
           <span className="app-chip inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold">
             <CheckCircle2 className="h-4 w-4" />
-            Live Mirror Node
+            {hasAnyWallet ? "Wallets Active" : "No Wallets"}
           </span>
         </div>
 
@@ -355,7 +385,7 @@ const Dashboard = () => {
               </p>
             </div>
 
-            {!hasLinkedWallet ? (
+            {!hasAnyWallet ? (
               <div className="mt-4 space-y-3">
                 <div className="space-y-2">
                   <Label htmlFor="passphrase" className="text-cyan-100">
@@ -383,14 +413,23 @@ const Dashboard = () => {
 
                 <Button type="button" className="app-btn-primary rounded-xl border-0" disabled={setupPending} onClick={createWallet}>
                   <KeyRound className="h-4 w-4" />
-                  {setupPending ? "Creating Wallet..." : "Create Hedera Wallet"}
+                  {setupPending ? "Creating Wallets..." : "Create Multi-Chain Wallet"}
                 </Button>
               </div>
             ) : (
               <div className="mt-4 space-y-3">
-                <p className="rounded-xl border border-cyan-300/20 bg-slate-950/25 p-3 text-sm text-cyan-100/90">
-                  Wallet linked: {effectiveAccountId}
-                </p>
+                <div className="space-y-2">
+                  {effectiveAccountId && (
+                    <p className="rounded-xl border border-cyan-300/20 bg-slate-950/25 p-3 text-sm text-cyan-100/90">
+                      <span className="text-xs text-cyan-100/50">Hedera:</span> {effectiveAccountId}
+                    </p>
+                  )}
+                  {solanaAddress && (
+                    <p className="rounded-xl border border-cyan-300/20 bg-slate-950/25 p-3 text-sm text-cyan-100/90 truncate">
+                      <span className="text-xs text-cyan-100/50">Solana:</span> {solanaAddress}
+                    </p>
+                  )}
+                </div>
                 <p className="text-xs text-cyan-100/70">
                   Local encrypted recovery: {hasVault ? "available" : "missing on this device"}.
                 </p>
@@ -505,33 +544,58 @@ const Dashboard = () => {
 
         <div className="space-y-4">
           <article className="app-card rounded-2xl p-5">
-            <h3 className="text-base font-semibold text-cyan-50">On-Chain Snapshot</h3>
+            <h3 className="text-base font-semibold text-cyan-50">On-Chain Balances</h3>
             <div className="mt-4 space-y-3">
+              {/* Hedera Section */}
               <div className="rounded-xl border border-cyan-300/20 bg-slate-950/25 p-3">
-                <p className="text-xs uppercase tracking-[0.2em] text-cyan-100/50">HBAR</p>
-                <p className="mt-2 text-sm text-cyan-100/90">
-                  {hederaOverviewQuery.data?.balanceHbar ?? "0.00000000"} HBAR
+                <p className="text-xs uppercase tracking-[0.2em] text-cyan-100/50 flex items-center gap-2">
+                  <Globe className="h-3 w-3" /> Hedera {HEDERA_IS_DEV ? "(Testnet)" : "(Mainnet)"}
                 </p>
-                <p className="mt-1 text-xs text-cyan-100/60">
-                  {hederaOverviewQuery.isFetching ? "Refreshing mirror data..." : "Mirror node synced"}
-                </p>
-                {hederaOverviewQuery.error ? (
-                  <p className="mt-1 text-xs text-amber-200">
-                    Mirror lookup failed for {effectiveAccountId}. Check network/account alignment.
-                  </p>
-                ) : null}
+                {effectiveAccountId ? (
+                  <>
+                    <p className="mt-2 text-sm text-cyan-100/90">
+                      {hederaOverviewQuery.data?.balanceHbar ?? "0.00000000"} HBAR
+                    </p>
+                    <p className="text-sm text-cyan-100/90">
+                      {usdcTokenBalance
+                        ? `${formatAmount(String(mirrorUsdcBalance))} USDC`
+                        : "0.00 USDC (not associated)"}
+                    </p>
+                    <p className="mt-1 text-xs text-cyan-100/60 truncate">
+                      Account: {effectiveAccountId}
+                    </p>
+                    {hederaOverviewQuery.error ? (
+                      <p className="mt-1 text-xs text-amber-200">Mirror lookup failed.</p>
+                    ) : null}
+                  </>
+                ) : (
+                  <p className="mt-2 text-xs text-cyan-100/60">No Hedera wallet created</p>
+                )}
               </div>
 
+              {/* Solana Section */}
               <div className="rounded-xl border border-cyan-300/20 bg-slate-950/25 p-3">
-                <p className="text-xs uppercase tracking-[0.2em] text-cyan-100/50">USDC Token</p>
-                <p className="mt-2 text-sm text-cyan-100/90">
-                  {usdcTokenBalance
-                    ? `${formatAmount(String(mirrorUsdcBalance))} USDC (${usdcTokenBalance.balance} units)`
-                    : "Not present or zero balance"}
+                <p className="text-xs uppercase tracking-[0.2em] text-cyan-100/50 flex items-center gap-2">
+                  <Globe className="h-3 w-3" /> Solana ({getSolanaNetworkDisplay()})
                 </p>
-                <p className="mt-1 text-xs text-cyan-100/60">
-                  Status: {effectiveUsdcAssociated ? "associated" : "not associated"}
-                </p>
+                {solanaAddress ? (
+                  <>
+                    <p className="mt-2 text-sm text-cyan-100/90">
+                      {solanaWalletQuery.balances?.sol?.amount?.toFixed(4) ?? "0.0000"} SOL
+                    </p>
+                    <p className="text-sm text-cyan-100/90">
+                      {solanaWalletQuery.balances?.usdc?.amount?.toFixed(2) ?? "0.00"} USDC
+                    </p>
+                    <p className="mt-1 text-xs text-cyan-100/60 truncate">
+                      Address: {solanaAddress}
+                    </p>
+                    {solanaWalletQuery.balances === null && !solanaWalletQuery.isLoading ? (
+                      <p className="mt-1 text-xs text-amber-200">RPC lookup failed.</p>
+                    ) : null}
+                  </>
+                ) : (
+                  <p className="mt-2 text-xs text-cyan-100/60">No Solana wallet created</p>
+                )}
               </div>
 
               <div className="rounded-xl border border-cyan-300/20 bg-slate-950/25 p-3">
@@ -539,7 +603,7 @@ const Dashboard = () => {
                 <div className="mt-2 space-y-2 text-sm text-cyan-100/80">
                   <p className="flex items-center gap-2">
                     <ArrowDownLeft className="h-4 w-4 text-cyan-200" />
-                    On-ramp: Coinbase sandbox
+                    Hedera: MoonPay | Solana: Coinbase
                   </p>
                   <p className="flex items-center gap-2">
                     <ArrowUpRight className="h-4 w-4 text-emerald-300" />

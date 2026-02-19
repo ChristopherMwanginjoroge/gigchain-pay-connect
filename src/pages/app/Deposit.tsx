@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { Link, Navigate } from "react-router-dom";
-import { ArrowDownToLine, CreditCard, Landmark, Loader2, Sparkles } from "lucide-react";
+import { ArrowDownToLine, CreditCard, Landmark, Loader2, Sparkles, ExternalLink, Wallet } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,16 +10,55 @@ import { useProfileQuery } from "@/lib/api/profile";
 import { useWalletBalanceQuery } from "@/lib/api/wallet";
 import { useCreateTransactionMutation, useUpdateTransactionStatusMutation } from "@/lib/api/transactions";
 import { useHederaOverviewQuery, useHederaTokenBalancesQuery } from "@/lib/api/hedera";
+import { useSolanaWalletData } from "@/lib/api/solana";
 import { getAccountTokenBalances } from "@/lib/hedera/mirror";
+import { getSolanaUsdcBalance } from "@/lib/solana/rpc";
 import { HEDERA_NETWORK, HEDERA_USDC_TOKEN_ID } from "@/lib/hedera/config";
-import { createCoinbaseOnrampSession, launchCoinbaseOnramp } from "@/lib/onramp/coinbase";
+import { SOLANA_NETWORK, getSolanaNetworkDisplay } from "@/lib/solana/config";
+import { 
+  openMoonPayIframe, 
+  estimateMoonPayFees,
+  isMoonPayAvailable,
+  getMoonPayEnvironment,
+  listenForMoonPayEvents,
+  type MoonPayTransactionData
+} from "@/lib/onramp/moonpay";
+import {
+  createCoinbaseOnrampSession,
+  isCoinbaseConfigured,
+  countryByFiat,
+} from "@/lib/onramp/coinbase";
+import {
+  buildPaycrestCheckoutUrl,
+  isPaycrestConfigured,
+} from "@/lib/onramp/paycrest";
 
-type DepositProvider = "coinbase" | "yellow_card" | "paychant";
+// Supported blockchain networks
+type NetworkType = "hedera" | "solana";
+
+// Provider depends on network
+type DepositProvider = "moonpay" | "coinbase" | "paycrest";
+
+const networkLabels: Record<NetworkType, string> = {
+  hedera: "Hedera",
+  solana: "Solana",
+};
+
+const networkDescriptions: Record<NetworkType, string> = {
+  hedera: "Fast, eco-friendly, enterprise-grade",
+  solana: "High-speed, low-cost transactions",
+};
+
+// Providers available per network
+const providersByNetwork: Record<NetworkType, DepositProvider[]> = {
+  hedera: ["moonpay", "paycrest"],
+  solana: ["coinbase", "paycrest"],
+};
 
 const providerLabels: Record<DepositProvider, string> = {
-  coinbase: "Coinbase CDP Onramp",
-  yellow_card: "Yellow Card Hosted Checkout",
-  paychant: "Paychant Hosted Checkout",
+  moonpay: "MoonPay (Card/Bank → USDC)",
+  coinbase: "Coinbase (Card/Bank → USDC)",
+  paycrest: "Paycrest (Mobile Money → USDC)",
 };
 
 const fiatByCountryCode: Record<string, string> = {
@@ -63,16 +102,31 @@ const Deposit = () => {
   const createTransactionMutation = useCreateTransactionMutation();
   const updateTransactionMutation = useUpdateTransactionStatusMutation();
   const profile = profileQuery.data;
-  const linkedAccountFromProfile = profile?.hedera_account_id?.trim() || null;
-  const linkedAccountFromWallet = walletQuery.data?.hedera_account_id?.trim() || null;
-  const accountId = linkedAccountFromProfile || linkedAccountFromWallet;
+  
+  // Multi-chain wallet addresses
+  const hederaAccountId = profile?.hedera_account_id?.trim() || walletQuery.data?.hedera_account_id?.trim() || null;
+  const solanaAddress = profile?.solana_address?.trim() || null;
+  
+  // Network selection state
+  const [selectedNetwork, setSelectedNetwork] = useState<NetworkType>(
+    profile?.preferred_network || "hedera"
+  );
+  
+  // Active wallet based on selected network
+  const activeWalletAddress = selectedNetwork === "hedera" ? hederaAccountId : solanaAddress;
 
-  const hederaOverviewQuery = useHederaOverviewQuery(accountId);
-  const hederaTokensQuery = useHederaTokenBalancesQuery(accountId);
+  // Hedera queries
+  const hederaOverviewQuery = useHederaOverviewQuery(hederaAccountId);
+  const hederaTokensQuery = useHederaTokenBalancesQuery(hederaAccountId);
+  
+  // Solana queries
+  const solanaWalletQuery = useSolanaWalletData(solanaAddress || undefined);
 
   const [amount, setAmount] = useState("50");
   const [fiatCurrency, setFiatCurrency] = useState("USD");
-  const [provider, setProvider] = useState<DepositProvider>("coinbase");
+  const [provider, setProvider] = useState<DepositProvider>(
+    selectedNetwork === "hedera" ? "moonpay" : "coinbase"
+  );
   const [providerReference, setProviderReference] = useState("");
   const [launching, setLaunching] = useState(false);
   const [monitorState, setMonitorState] = useState<{
@@ -82,22 +136,45 @@ const Deposit = () => {
     provider: DepositProvider;
     reference?: string;
   } | null>(null);
+  
+  // MoonPay widget state
+  const [moonpayOrderId, setMoonpayOrderId] = useState<string | null>(null);
+  const cleanupWidgetRef = useRef<(() => void) | null>(null);
+  const cleanupEventsRef = useRef<(() => void) | null>(null);
 
   const derivedFiat = useMemo(() => resolveFiatFromCountry(profile?.country_code), [profile?.country_code]);
-  const usdcBalanceUnits = useMemo(
+  
+  // USDC balances per network
+  const hederaUsdcBalance = useMemo(
     () => parseUnits((hederaTokensQuery.data ?? []).find((token) => token.token_id === HEDERA_USDC_TOKEN_ID)?.balance),
     [hederaTokensQuery.data],
   );
+  const solanaUsdcBalance = solanaWalletQuery.balances?.usdc?.amount ?? 0;
+  const usdcBalanceUnits = selectedNetwork === "hedera" ? hederaUsdcBalance : solanaUsdcBalance;
+  
+  // Native balances
   const hbarBalance = hederaOverviewQuery.data?.balanceHbar ?? "0.00000000";
+  const solBalance = solanaWalletQuery.balances?.sol?.amount?.toFixed(9) ?? "0.000000000";
+  const nativeBalance = selectedNetwork === "hedera" ? hbarBalance : solBalance;
+  const nativeSymbol = selectedNetwork === "hedera" ? "HBAR" : "SOL";
+  
   const numericAmount = Number(amount || 0);
   const previewUsdc = Number.isFinite(numericAmount) ? numericAmount : 0;
+
+  // Update provider when network changes
+  useEffect(() => {
+    const availableProviders = providersByNetwork[selectedNetwork];
+    if (!availableProviders.includes(provider)) {
+      setProvider(availableProviders[0]);
+    }
+  }, [selectedNetwork, provider]);
 
   useEffect(() => {
     setFiatCurrency(derivedFiat);
   }, [derivedFiat]);
 
   useEffect(() => {
-    if (!monitorState || !accountId) {
+    if (!monitorState || !activeWalletAddress) {
       return;
     }
 
@@ -115,7 +192,7 @@ const Deposit = () => {
           await updateTransactionMutation.mutateAsync({
             id: monitorState.transactionId,
             status: "failed",
-            description: "Deposit confirmation timed out while polling mirror node.",
+            description: "Deposit confirmation timed out while polling.",
           });
         } catch {
           // Avoid blocking UI if policy blocks updates.
@@ -124,8 +201,16 @@ const Deposit = () => {
       }
 
       try {
-        const balances = await getAccountTokenBalances(accountId);
-        const currentUsdc = parseUnits(balances.find((token) => token.token_id === HEDERA_USDC_TOKEN_ID)?.balance);
+        let currentUsdc = 0;
+        
+        if (selectedNetwork === "hedera" && hederaAccountId) {
+          const balances = await getAccountTokenBalances(hederaAccountId);
+          currentUsdc = parseUnits(balances.find((token) => token.token_id === HEDERA_USDC_TOKEN_ID)?.balance);
+        } else if (selectedNetwork === "solana" && solanaAddress) {
+          const solanaBalance = await getSolanaUsdcBalance(solanaAddress);
+          currentUsdc = solanaBalance.amount;
+        }
+        
         if (currentUsdc > monitorState.baselineUsdc) {
           setMonitorState(null);
           toast.success("Deposit detected on-chain. USDC balance updated.");
@@ -133,12 +218,13 @@ const Deposit = () => {
             await updateTransactionMutation.mutateAsync({
               id: monitorState.transactionId,
               status: "completed",
-              description: "USDC deposit detected on Hedera mirror node.",
+              description: `USDC deposit detected on ${networkLabels[selectedNetwork]}.`,
               metadata: {
                 source: "web",
                 flow: "deposit",
                 provider: monitorState.provider,
                 providerReference: monitorState.reference,
+                network: selectedNetwork,
                 detectedOnChain: true,
               },
             });
@@ -147,7 +233,7 @@ const Deposit = () => {
           }
         }
       } catch {
-        // Keep polling on transient mirror node failures.
+        // Keep polling on transient failures.
       }
     }, monitorIntervalMs);
 
@@ -155,7 +241,7 @@ const Deposit = () => {
       cancelled = true;
       window.clearInterval(intervalId);
     };
-  }, [accountId, monitorState, updateTransactionMutation]);
+  }, [activeWalletAddress, hederaAccountId, solanaAddress, selectedNetwork, monitorState, updateTransactionMutation]);
 
   if (profileQuery.isLoading || walletQuery.isLoading) {
     return (
@@ -165,42 +251,153 @@ const Deposit = () => {
     );
   }
 
-  if (!accountId) {
+  // Check that at least one network wallet exists
+  const hasAnyWallet = hederaAccountId || solanaAddress;
+  if (!hasAnyWallet) {
     return <Navigate to="/app/dashboard" replace />;
   }
+  
+  // Check wallet exists for selected network
+  const hasWalletForSelectedNetwork = selectedNetwork === "hedera" ? !!hederaAccountId : !!solanaAddress;
 
   const startDeposit = async () => {
     if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
       toast.error("Enter a deposit amount greater than zero.");
       return;
     }
+    
+    if (!hasWalletForSelectedNetwork) {
+      toast.error(`No ${networkLabels[selectedNetwork]} wallet found. Please create one first.`);
+      return;
+    }
 
     setLaunching(true);
     try {
-      const freshTokenBalances = await getAccountTokenBalances(accountId);
-      const baselineUsdc = parseUnits(
-        freshTokenBalances.find((token) => token.token_id === HEDERA_USDC_TOKEN_ID)?.balance,
-      );
+      // Get baseline USDC balance for selected network
+      let baselineUsdc = 0;
+      if (selectedNetwork === "hedera" && hederaAccountId) {
+        const freshTokenBalances = await getAccountTokenBalances(hederaAccountId);
+        baselineUsdc = parseUnits(
+          freshTokenBalances.find((token) => token.token_id === HEDERA_USDC_TOKEN_ID)?.balance,
+        );
+      } else if (selectedNetwork === "solana" && solanaAddress) {
+        const solanaBalance = await getSolanaUsdcBalance(solanaAddress);
+        baselineUsdc = solanaBalance.amount;
+      }
 
       const transaction = await createTransactionMutation.mutateAsync({
         flow: "deposit",
         amount: numericAmount,
         targetType: provider,
-        targetValue: providerReference || profile.phone || accountId,
-        note: `Deposit initiated via ${providerLabels[provider]}`,
+        targetValue: providerReference || profile.phone || activeWalletAddress || "",
+        note: `Deposit initiated via ${providerLabels[provider]} on ${networkLabels[selectedNetwork]}`,
         currency: "USDC",
       });
 
+      if (provider === "moonpay") {
+        // MoonPay widget handles KYC, payment, and USDC delivery to Hedera
+        if (!isMoonPayAvailable()) {
+          throw new Error("MoonPay API key not configured. Please set VITE_MOONPAY_API_KEY.");
+        }
+
+        // Set up event listeners for MoonPay postMessage events
+        const cleanupEvents = listenForMoonPayEvents({
+          onTransactionCreated: (data: MoonPayTransactionData) => {
+            setMoonpayOrderId(data.id);
+            toast.info(`Order ${data.id} created. Complete payment in MoonPay.`);
+          },
+          onTransactionCompleted: async (data: MoonPayTransactionData) => {
+            setMoonpayOrderId(null);
+            toast.success(`USDC purchase complete! ${data.quoteCurrencyAmount} USDC incoming.`);
+            cleanupWidgetRef.current?.();
+            cleanupEventsRef.current?.();
+            try {
+              await updateTransactionMutation.mutateAsync({
+                id: transaction.id,
+                status: "completed",
+                description: `MoonPay order ${data.id} completed. ${data.quoteCurrencyAmount} USDC.`,
+                metadata: {
+                  source: "web",
+                  flow: "deposit",
+                  provider: "moonpay",
+                  network: selectedNetwork,
+                  moonpayOrderId: data.id,
+                  cryptoAmount: data.quoteCurrencyAmount,
+                  transactionHash: data.cryptoTransactionId,
+                },
+              });
+            } catch {
+              // Transaction update may fail due to RLS
+            }
+          },
+          onTransactionFailed: async (data: MoonPayTransactionData) => {
+            setMoonpayOrderId(null);
+            toast.error(`Order failed: ${data.status}`);
+            cleanupWidgetRef.current?.();
+            try {
+              await updateTransactionMutation.mutateAsync({
+                id: transaction.id,
+                status: "failed",
+                description: `MoonPay order ${data.id} failed: ${data.status}`,
+              });
+            } catch {
+              // Transaction update may fail due to RLS
+            }
+          },
+          onClose: () => {
+            setLaunching(false);
+            cleanupWidgetRef.current = null;
+            cleanupEventsRef.current = null;
+          },
+        });
+        cleanupEventsRef.current = cleanupEvents;
+
+        // Open MoonPay iframe overlay
+        const { cleanup } = openMoonPayIframe({
+          walletAddress: hederaAccountId!,
+          fiatAmount: numericAmount,
+          fiatCurrency,
+          email: profile.email,
+          externalTransactionId: transaction.id,
+          redirectURL: `${window.location.origin}/app/activity`,
+          showWalletAddressForm: false,
+        });
+        cleanupWidgetRef.current = cleanup;
+        
+        setMonitorState({
+          baselineUsdc,
+          startedAt: Date.now(),
+          transactionId: transaction.id,
+          provider,
+          reference: transaction.id,
+        });
+        toast.success("MoonPay widget opened. Complete KYC and payment.");
+        return;
+      }
+
       if (provider === "coinbase") {
+        // Coinbase Pay for Solana USDC - uses session token from edge function
+        if (!isCoinbaseConfigured()) {
+          throw new Error("Coinbase not configured. Please set VITE_COINBASE_ONRAMP_APP_ID.");
+        }
+        
+        toast.info("Initializing Coinbase Pay...");
+        
+        // Get country code for Coinbase
+        const country = countryByFiat[fiatCurrency] || "US";
+        
+        // Create session with token (calls edge function)
         const session = await createCoinbaseOnrampSession({
+          walletAddress: solanaAddress!,
+          network: "solana",
+          asset: "USDC",
           amount: numericAmount,
           currency: fiatCurrency,
-          walletAddress: accountId,
-          network: HEDERA_NETWORK === "mainnet" ? "hedera-mainnet" : "hedera-testnet",
-          asset: "USDC",
-          email: profile.email ?? undefined,
+          country,
+          paymentMethod: "CARD",
         });
-        launchCoinbaseOnramp(session);
+        
+        window.open(session.launchUrl, "_blank", "noopener,noreferrer");
         setMonitorState({
           baselineUsdc,
           startedAt: Date.now(),
@@ -208,17 +405,41 @@ const Deposit = () => {
           provider,
           reference: session.referenceId,
         });
-        toast.success(`Coinbase onramp started (${session.referenceId}).`);
+        toast.success("Coinbase Pay opened. Monitoring wallet for incoming USDC.");
         return;
       }
 
-      const hostedBaseUrl =
-        provider === "yellow_card" ? import.meta.env.VITE_YELLOW_CARD_HOSTED_URL : import.meta.env.VITE_PAYCHANT_HOSTED_URL;
+      if (provider === "paycrest") {
+        // Paycrest for African mobile money
+        const paycrestUrl = buildPaycrestCheckoutUrl({
+          walletAddress: activeWalletAddress!,
+          network: selectedNetwork,
+          cryptoCurrency: "USDC",
+          fiatCurrency,
+          fiatAmount: numericAmount,
+          phone: profile.phone ?? "",
+          email: profile.email ?? "",
+          partnerReference: transaction.id,
+        });
+        window.open(paycrestUrl, "_blank", "noopener,noreferrer");
+        setMonitorState({
+          baselineUsdc,
+          startedAt: Date.now(),
+          transactionId: transaction.id,
+          provider,
+        });
+        toast.success(`${providerLabels[provider]} launched. Monitoring wallet for incoming USDC.`);
+        return;
+      }
+
+      // Legacy hosted provider fallback
+      const hostedBaseUrl = import.meta.env.VITE_PAYCREST_HOSTED_URL;
       if (!hostedBaseUrl) {
         throw new Error(`Missing hosted checkout URL for ${provider}. Configure env and retry.`);
       }
       const hostedUrl = buildHostedProviderUrl(hostedBaseUrl, {
-        wallet: accountId,
+        wallet: activeWalletAddress!,
+        network: selectedNetwork,
         amount: numericAmount.toFixed(2),
         currency: fiatCurrency,
         phone: profile.phone ?? "",
@@ -245,12 +466,48 @@ const Deposit = () => {
         <p className="text-xs uppercase tracking-[0.24em] text-cyan-100/60">Deposit USDC</p>
         <h1 className="mt-3 text-3xl font-bold tracking-tight text-cyan-50">Fiat On-ramp</h1>
         <p className="mt-1 text-sm text-cyan-100/65">
-          Start a provider checkout and monitor Hedera mirror updates until USDC arrives.
+          Select network, choose provider, and monitor for incoming USDC.
         </p>
+        
+        {/* Network Selection */}
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          {(["hedera", "solana"] as NetworkType[]).map((network) => {
+            const hasWallet = network === "hedera" ? !!hederaAccountId : !!solanaAddress;
+            const isSelected = selectedNetwork === network;
+            return (
+              <button
+                key={network}
+                onClick={() => hasWallet && setSelectedNetwork(network)}
+                disabled={!hasWallet}
+                className={`relative rounded-xl border p-4 text-left transition-all ${
+                  isSelected
+                    ? "border-cyan-400 bg-cyan-950/40"
+                    : hasWallet
+                    ? "border-cyan-300/20 bg-slate-950/25 hover:border-cyan-300/40"
+                    : "border-cyan-300/10 bg-slate-950/15 opacity-50 cursor-not-allowed"
+                }`}
+              >
+                {isSelected && (
+                  <div className="absolute top-2 right-2">
+                    <Sparkles className="h-4 w-4 text-cyan-400" />
+                  </div>
+                )}
+                <Wallet className="h-5 w-5 text-cyan-300/70 mb-2" />
+                <p className="font-medium text-cyan-50">{networkLabels[network]}</p>
+                <p className="text-xs text-cyan-100/60 mt-0.5">{networkDescriptions[network]}</p>
+                {!hasWallet && (
+                  <p className="text-xs text-amber-400/80 mt-2">No wallet created</p>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Balance Display */}
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           <div className="rounded-xl border border-cyan-300/20 bg-slate-950/25 p-3">
-            <p className="text-xs uppercase tracking-[0.2em] text-cyan-100/50">HBAR Balance</p>
-            <p className="mt-1 text-xl font-semibold text-cyan-50">{hbarBalance} HBAR</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-cyan-100/50">{nativeSymbol} Balance</p>
+            <p className="mt-1 text-xl font-semibold text-cyan-50">{nativeBalance} {nativeSymbol}</p>
           </div>
           <div className="rounded-xl border border-cyan-300/20 bg-slate-950/25 p-3">
             <p className="text-xs uppercase tracking-[0.2em] text-cyan-100/50">USDC Balance</p>
@@ -294,18 +551,52 @@ const Deposit = () => {
           </div>
 
           <div className="space-y-2">
-            <Label className="text-cyan-100">Provider</Label>
+            <Label className="text-cyan-100">Provider ({networkLabels[selectedNetwork]})</Label>
             <Select value={provider} onValueChange={(value) => setProvider(value as DepositProvider)}>
               <SelectTrigger className="border-cyan-300/25 bg-slate-900/30 text-cyan-50">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="coinbase">Coinbase CDP (Card/Bank)</SelectItem>
-                <SelectItem value="yellow_card">Yellow Card</SelectItem>
-                <SelectItem value="paychant">Paychant</SelectItem>
+                {providersByNetwork[selectedNetwork].map((prov) => (
+                  <SelectItem key={prov} value={prov}>
+                    {providerLabels[prov]}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
+
+          {/* MoonPay info */}
+          {provider === "moonpay" && (
+            <div className="rounded-lg border border-cyan-300/20 bg-cyan-950/20 p-3 space-y-2">
+              <p className="text-xs text-cyan-100/80">
+                <CreditCard className="inline h-3.5 w-3.5 mr-1" />
+                Pay with card, bank transfer, or Apple/Google Pay
+              </p>
+              <p className="text-xs text-cyan-100/60">
+                MoonPay handles KYC verification. USDC delivered directly to your Hedera wallet.
+              </p>
+              <p className="text-xs text-cyan-100/60">
+                Environment: {getMoonPayEnvironment()}
+              </p>
+            </div>
+          )}
+          
+          {/* Coinbase info */}
+          {provider === "coinbase" && (
+            <div className="rounded-lg border border-cyan-300/20 bg-cyan-950/20 p-3 space-y-2">
+              <p className="text-xs text-cyan-100/80">
+                <CreditCard className="inline h-3.5 w-3.5 mr-1" />
+                Pay with card, bank, or linked Coinbase account
+              </p>
+              <p className="text-xs text-cyan-100/60">
+                Coinbase handles KYC verification. USDC delivered directly to your Solana wallet.
+              </p>
+              <p className="text-xs text-cyan-100/60">
+                Network: {getSolanaNetworkDisplay()}
+              </p>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="providerRef" className="text-cyan-100">
@@ -319,6 +610,19 @@ const Deposit = () => {
               className="border-cyan-300/25 bg-slate-900/30 text-cyan-50"
             />
           </div>
+
+          {/* MoonPay order tracking */}
+          {moonpayOrderId && (
+            <div className="rounded-lg border border-amber-300/40 bg-amber-300/10 p-3">
+              <p className="text-xs text-amber-100">
+                <Loader2 className="inline h-3.5 w-3.5 mr-1 animate-spin" />
+                Order in progress: {moonpayOrderId}
+              </p>
+              <p className="text-xs text-amber-100/60 mt-1">
+                Complete the payment flow in the MoonPay widget.
+              </p>
+            </div>
+          )}
 
           <Button type="button" className="app-btn-primary rounded-xl border-0" disabled={launching} onClick={startDeposit}>
             {launching ? (
@@ -335,7 +639,7 @@ const Deposit = () => {
           </Button>
 
           <div className="flex items-center gap-3 text-xs text-cyan-100/65">
-            <p>Wallet destination: {accountId}</p>
+            <p>{networkLabels[selectedNetwork]} wallet: {activeWalletAddress}</p>
             <Button asChild variant="link" className="h-auto p-0 text-cyan-200">
               <Link to="/app/activity">View activity</Link>
             </Button>
@@ -354,10 +658,20 @@ const Deposit = () => {
 
           <div className="rounded-xl border border-cyan-300/20 bg-slate-950/25 p-3 text-sm text-cyan-100/80">
             <p className="flex items-center gap-2">
-              {provider === "coinbase" ? <CreditCard className="h-4 w-4 text-cyan-200" /> : <Landmark className="h-4 w-4 text-cyan-200" />}
+              {provider === "moonpay" ? <CreditCard className="h-4 w-4 text-cyan-200" /> : <Landmark className="h-4 w-4 text-cyan-200" />}
               {providerLabels[provider]}
             </p>
-            <p className="mt-2 text-xs text-cyan-100/65">Network: {HEDERA_NETWORK}</p>
+            {provider === "moonpay" ? (
+              <>
+                <p className="mt-2 text-xs text-cyan-100/65">Payment: Card, Bank, Apple/Google Pay</p>
+                <p className="mt-1 text-xs text-cyan-100/65">Direct to: {HEDERA_NETWORK}</p>
+                <p className="mt-1 text-xs text-emerald-300">
+                  Est. fee: ~${estimateMoonPayFees(numericAmount).estimatedFee.toFixed(2)} ({estimateMoonPayFees(numericAmount).feePercentage}%)
+                </p>
+              </>
+            ) : (
+              <p className="mt-2 text-xs text-cyan-100/65">Network: {HEDERA_NETWORK}</p>
+            )}
             <p className="mt-1 text-xs text-cyan-100/65">Asset: USDC ({HEDERA_USDC_TOKEN_ID || "set token id env"})</p>
           </div>
 
