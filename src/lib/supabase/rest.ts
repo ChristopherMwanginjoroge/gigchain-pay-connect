@@ -73,11 +73,15 @@ export async function storageUpload(bucket: string, filePath: string, file: File
     headers: {
       apikey: SUPABASE_ANON_KEY,
       Authorization: `Bearer ${token}`,
-      "Content-Type": file.type || "application/octet-stream",
+      // Don't set Content-Type - let browser handle it for file uploads
       "x-upsert": "false",
     },
     body: file,
   });
 
-  await parseResponse<unknown>(response);
+  // Parse response to get detailed error if upload fails
+  const result = await parseResponse<{ Key?: string; Id?: string }>(response);
+  
+  // Log the response for debugging
+  console.log(`✅ Uploaded to ${bucket}/${filePath}`, result);
 }

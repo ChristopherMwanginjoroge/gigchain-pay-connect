@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
+import { Link } from "react-router-dom";
 
 import { useAuthModal } from "@/components/auth/AuthModalProvider";
 import { Button } from "@/components/ui/button";
@@ -8,6 +9,7 @@ const navLinks = [
   { label: "Why GigChain", href: "#problem" },
   { label: "Product", href: "#solution" },
   { label: "How It Works", href: "#how-it-works" },
+  { label: "School", href: "/gigchain-school", isRoute: true },
   { label: "Testimonials", href: "#testimonials" },
   { label: "FAQ", href: "#faq" },
 ];
@@ -59,15 +61,25 @@ const Navbar = () => {
             </a>
 
             <nav className="hidden items-center gap-6 lg:flex">
-              {navLinks.map((link) => (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  className="text-sm font-medium text-slate-300 transition-colors hover:text-white"
-                >
-                  {link.label}
-                </a>
-              ))}
+              {navLinks.map((link) =>
+                link.isRoute ? (
+                  <Link
+                    key={link.href}
+                    to={link.href}
+                    className="text-sm font-medium text-slate-300 transition-colors hover:text-white"
+                  >
+                    {link.label}
+                  </Link>
+                ) : (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    className="text-sm font-medium text-slate-300 transition-colors hover:text-white"
+                  >
+                    {link.label}
+                  </a>
+                ),
+              )}
             </nav>
 
             <div className="hidden items-center gap-3 md:flex">
@@ -98,16 +110,27 @@ const Navbar = () => {
           {mobileOpen ? (
             <div className="border-t border-white/10 px-4 py-4 md:hidden">
               <nav className="grid gap-2">
-                {navLinks.map((link) => (
-                  <a
-                    key={link.href}
-                    href={link.href}
-                    className="rounded-2xl px-4 py-3 text-sm font-medium text-slate-200 transition-colors hover:bg-white/5 hover:text-white"
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    {link.label}
-                  </a>
-                ))}
+                {navLinks.map((link) =>
+                  link.isRoute ? (
+                    <Link
+                      key={link.href}
+                      to={link.href}
+                      className="rounded-2xl px-4 py-3 text-sm font-medium text-slate-200 transition-colors hover:bg-white/5 hover:text-white"
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      {link.label}
+                    </Link>
+                  ) : (
+                    <a
+                      key={link.href}
+                      href={link.href}
+                      className="rounded-2xl px-4 py-3 text-sm font-medium text-slate-200 transition-colors hover:bg-white/5 hover:text-white"
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      {link.label}
+                    </a>
+                  ),
+                )}
               </nav>
 
               <div className="mt-4 grid gap-3">

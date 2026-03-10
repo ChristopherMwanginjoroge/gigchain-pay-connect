@@ -1,4 +1,5 @@
 import { ArrowRight, BookOpenText, Coins, Trophy } from "lucide-react";
+import { Link } from "react-router-dom";
 
 import Reveal from "@/components/landing/Reveal";
 import SectionIntro from "@/components/landing/SectionIntro";
@@ -30,10 +31,10 @@ const SchoolSection = () => {
                 A gamified learning layer that connects education to earning.
               </h3>
               <Button asChild size="xl" className="rounded-2xl bg-cyan-300 text-slate-950 hover:bg-cyan-200">
-                <a href="#waitlist">
-                  Join Waitlist
+                <Link to="/gigchain-school">
+                  Learn More
                   <ArrowRight />
-                </a>
+                </Link>
               </Button>
             </div>
 

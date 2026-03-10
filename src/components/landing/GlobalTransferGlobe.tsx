@@ -61,7 +61,7 @@ const GlobeCard = ({
     >
       <div className="flex items-start gap-2.5">
         <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-cyan-100 text-cyan-950">
-          <Icon className="h-4 w-4" />
+          <Icon className="h-2 w-2" />
         </div>
         <div>
           <p className="text-sm font-semibold tracking-tight">{title}</p>
@@ -100,8 +100,8 @@ const GlobalTransferGlobe = () => {
     let phi = 0;
     const globe = createGlobe(canvasRef.current, {
       devicePixelRatio: Math.min(window.devicePixelRatio, 2),
-      width: size * 2,
-      height: size * 2,
+      width: size * 1,
+      height: size * 1,
       phi: 0,
       theta: 0.32,
       dark: 0,
@@ -115,8 +115,8 @@ const GlobalTransferGlobe = () => {
       markers: globeMarkers,
       onRender: (state) => {
         state.phi = phi;
-        state.width = size * 2;
-        state.height = size * 2;
+        state.width = size * 1;
+        state.height = size * 1;
         phi += 0.0032;
       },
     });
@@ -159,12 +159,16 @@ const GlobalTransferGlobe = () => {
             {/* Soft glow background */}
             <div className="absolute inset-0 rounded-full bg-gradient-to-br from-cyan-100 to-blue-100 opacity-40 blur-3xl" />
             
-            {/* Main globe container */}
-            <div className="absolute inset-[8%] rounded-full bg-gradient-to-br from-slate-50 to-white shadow-2xl">
+            {/* Main globe container with centered canvas */}
+            <div className="absolute inset-[8%] flex items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-slate-50 to-white shadow-2xl">
               <canvas
                 ref={canvasRef}
-                className="absolute inset-0 h-full w-full rounded-full"
-                style={{ width: "100%", height: "100%" }}
+                className="h-full w-full"
+                style={{ 
+                  width: size,
+                  height: size,
+                  display: 'block'
+                }}
               />
             </div>
 

@@ -1,5 +1,6 @@
 import { FormEvent, useState } from "react";
 import { ArrowRight, BadgeCheck, Send, Smartphone } from "lucide-react";
+import { Link } from "react-router-dom";
 
 import { useAuthModal } from "@/components/auth/AuthModalProvider";
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,7 @@ const footerLinks = [
   { label: "Problem", href: "#problem" },
   { label: "Solution", href: "#solution" },
   { label: "How It Works", href: "#how-it-works" },
-  { label: "School", href: "#school" },
+  { label: "GigChain School", href: "/gigchain-school", isRoute: true },
   { label: "Security", href: "#security" },
   { label: "Pricing", href: "#pricing" },
 ];
@@ -140,11 +141,17 @@ const Footer = () => {
             <div>
               <p className="text-xs uppercase tracking-[0.32em] text-cyan-100/65">Navigate</p>
               <div className="mt-4 grid gap-3">
-                {footerLinks.map((link) => (
-                  <a key={link.href} href={link.href} className="text-sm text-slate-300 transition-colors hover:text-white">
-                    {link.label}
-                  </a>
-                ))}
+                {footerLinks.map((link) =>
+                  link.isRoute ? (
+                    <Link key={link.href} to={link.href} className="text-sm text-slate-300 transition-colors hover:text-white">
+                      {link.label}
+                    </Link>
+                  ) : (
+                    <a key={link.href} href={link.href} className="text-sm text-slate-300 transition-colors hover:text-white">
+                      {link.label}
+                    </a>
+                  ),
+                )}
               </div>
             </div>
 

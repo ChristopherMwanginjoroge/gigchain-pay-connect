@@ -7,6 +7,7 @@ import { AuthProvider } from "@/lib/auth/AuthProvider";
 import { AuthModalProvider } from "@/components/auth/AuthModalProvider";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index";
+import GigChainSchool from "./pages/GigChainSchool";
 import NotFound from "./pages/NotFound";
 import AppLayout from "@/pages/AppLayout";
 import Dashboard from "@/pages/app/Dashboard";
@@ -28,6 +29,7 @@ const App = () => (
           <AuthModalProvider>
             <Routes>
               <Route path="/" element={<Index />} />
+              <Route path="/gigchain-school" element={<GigChainSchool />} />
 
               <Route element={<ProtectedRoute />}>
                 <Route path="/app" element={<AppLayout />}>

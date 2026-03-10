@@ -27,8 +27,28 @@ export async function submitKyc(payload: SubmitKycInput): Promise<KycRecord> {
   const documentPath = buildStoragePath(userId, payload.documentFile.name, now);
   const selfiePath = buildStoragePath(userId, payload.selfieFile.name, now + 1);
 
-  await storageUpload("kyc-documents", documentPath, payload.documentFile);
-  await storageUpload("kyc-selfies", selfiePath, payload.selfieFile);
+  console.log("🔍 KYC Upload Debug:");
+  console.log("  User ID:", userId);
+  console.log("  Document Path:", documentPath);
+  console.log("  Selfie Path:", selfiePath);
+  console.log("  Document File:", payload.documentFile.name, payload.documentFile.type, payload.documentFile.size);
+  console.log("  Selfie File:", payload.selfieFile.name, payload.selfieFile.type, payload.selfieFile.size);
+
+  try {
+    await storageUpload("kyc-documents", documentPath, payload.documentFile);
+    console.log("✅ Document uploaded successfully");
+  } catch (error) {
+    console.error("❌ Document upload failed:", error);
+    throw new Error(`Failed to upload document: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+
+  try {
+    await storageUpload("kyc-selfies", selfiePath, payload.selfieFile);
+    console.log("✅ Selfie uploaded successfully");
+  } catch (error) {
+    console.error("❌ Selfie upload failed:", error);
+    throw new Error(`Failed to upload selfie: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
 
   const rows = await restRequest<KycRecord[]>(
     "kyc?select=*",

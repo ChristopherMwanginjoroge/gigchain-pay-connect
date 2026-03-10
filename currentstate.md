@@ -1,6 +1,10 @@
 # GigPay Web Current State
 
-Last updated: 2026-02-18
+Last updated: 2026-03-10
+
+> **📚 Note:** For comprehensive implementation status and pending features, see:
+> - **[IMPLEMENTATION_STATUS.md](IMPLEMENTATION_STATUS.md)** - Complete detailed documentation
+> - **[QUICK_REFERENCE.md](QUICK_REFERENCE.md)** - Quick overview and cheat sheet
 
 ## Overview
 
