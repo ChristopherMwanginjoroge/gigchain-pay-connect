@@ -32,7 +32,7 @@ const AppNav = () => {
           <div className="app-screen flex h-16 items-center justify-between rounded-2xl px-4">
             <Link to="/app/dashboard" className="flex items-center gap-2 text-base font-bold tracking-tight text-cyan-100">
               <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-400/20 text-cyan-200">G</span>
-              GigPay Web
+              GigChain Pay
             </Link>
 
             <nav className="hidden items-center gap-2 md:flex">

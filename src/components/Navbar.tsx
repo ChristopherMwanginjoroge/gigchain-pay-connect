@@ -1,63 +1,141 @@
-import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Menu, X } from "lucide-react";
+
 import { useAuthModal } from "@/components/auth/AuthModalProvider";
+import { Button } from "@/components/ui/button";
+
+const navLinks = [
+  { label: "Why GigChain", href: "#problem" },
+  { label: "Product", href: "#solution" },
+  { label: "How It Works", href: "#how-it-works" },
+  { label: "Testimonials", href: "#testimonials" },
+  { label: "FAQ", href: "#faq" },
+];
 
 const Navbar = () => {
-    const [scrolled, setScrolled] = useState(false);
-    const { openAuthModal } = useAuthModal();
+  const { openAuthModal } = useAuthModal();
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
-    useEffect(() => {
-        const handleScroll = () => {
-            setScrolled(window.scrollY > 20);
-        };
-        window.addEventListener("scroll", handleScroll);
-        return () => window.removeEventListener("scroll", handleScroll);
-    }, []);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
-    return (
-        <nav
-            className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "py-1.5" : "py-3"
-                }`}
+  useEffect(() => {
+    if (!mobileOpen) {
+      return;
+    }
+
+    const onResize = () => {
+      if (window.innerWidth >= 768) {
+        setMobileOpen(false);
+      }
+    };
+
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [mobileOpen]);
+
+  return (
+    <header className="fixed inset-x-0 top-0 z-50 px-4 py-4">
+      <div className="container">
+        <div
+          className={`transition-all duration-300 ${
+            scrolled ? "border-white/12 bg-slate-950/82 shadow-2xl shadow-slate-950/20" : "border-white/10 bg-slate-950/55"
+          } rounded-[1.5rem] border backdrop-blur-xl`}
         >
-            <div className="container max-w-7xl">
-                <div className={`
-          relative flex items-center justify-between px-5 h-11 
-          transition-all duration-500 rounded-xl border
-          ${scrolled
-                        ? "bg-white/80 backdrop-blur-xl border-accent/40 shadow-md"
-                        : "bg-white/40 backdrop-blur-md border-accent/10 shadow-sm"
-                    }
-        `}>
-                    <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 flex items-center justify-center overflow-hidden rounded-lg">
-                            <img src="/favicon.png" alt="GigPay Logo" className="w-full h-full object-contain" />
-                        </div>
-                        <span className="text-primary font-bold text-[15px] tracking-tight">GigPay</span>
-                    </div>
+          <div className="flex items-center justify-between px-4 py-3 sm:px-6">
+            <a href="#hero" className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-cyan-300/12 text-lg font-semibold text-cyan-100">
+                G
+              </div>
+              <div>
+                <p className="font-display text-base font-semibold tracking-tight text-white sm:text-lg">GigChain Pay</p>
+                <p className="hidden text-xs uppercase tracking-[0.28em] text-slate-400 sm:block">Kenya-first global payouts</p>
+              </div>
+            </a>
 
-                    <div className="hidden md:flex items-center gap-6">
-                        <a href="#problem" className="text-primary/60 hover:text-primary transition-colors text-[11px] font-medium">Why GigPay</a>
-                        <a href="#features" className="text-primary/60 hover:text-primary transition-colors text-[11px] font-medium">Network</a>
-                        <a href="#benefits" className="text-primary/60 hover:text-primary transition-colors text-[11px] font-medium">Benefits</a>
-                    </div>
+            <nav className="hidden items-center gap-6 lg:flex">
+              {navLinks.map((link) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  className="text-sm font-medium text-slate-300 transition-colors hover:text-white"
+                >
+                  {link.label}
+                </a>
+              ))}
+            </nav>
 
-                    <div className="flex items-center gap-1.5 md:gap-2">
-                        <Button size="sm" variant="outline" className="rounded-lg px-2 md:px-3 py-1.5 text-[10px] md:text-[11px] font-semibold h-7 md:h-8 hidden sm:inline-flex">
-                            Download App
-                        </Button>
-                        <Button
-                            size="sm"
-                            className="rounded-lg px-3 md:px-4 py-1.5 text-[10px] md:text-[11px] bg-primary font-semibold hover:shadow-glow transition-all h-7 md:h-8"
-                            onClick={openAuthModal}
-                        >
-                            <span className="hidden sm:inline">Getting Started</span>
-                            <span className="sm:hidden">Start</span>
-                        </Button>
-                    </div>
-                </div>
+            <div className="hidden items-center gap-3 md:flex">
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="rounded-xl border-white/15 bg-transparent text-white hover:bg-white/10 hover:text-white"
+              >
+                <a href="#waitlist">Join Waitlist</a>
+              </Button>
+              <Button size="sm" className="rounded-xl bg-cyan-300 text-slate-950 hover:bg-cyan-200" onClick={openAuthModal}>
+                Get Started
+              </Button>
             </div>
-        </nav>
-    );
+
+            <button
+              type="button"
+              className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-white md:hidden"
+              onClick={() => setMobileOpen((current) => !current)}
+              aria-label={mobileOpen ? "Close navigation" : "Open navigation"}
+              aria-expanded={mobileOpen}
+            >
+              {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          </div>
+
+          {mobileOpen ? (
+            <div className="border-t border-white/10 px-4 py-4 md:hidden">
+              <nav className="grid gap-2">
+                {navLinks.map((link) => (
+                  <a
+                    key={link.href}
+                    href={link.href}
+                    className="rounded-2xl px-4 py-3 text-sm font-medium text-slate-200 transition-colors hover:bg-white/5 hover:text-white"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    {link.label}
+                  </a>
+                ))}
+              </nav>
+
+              <div className="mt-4 grid gap-3">
+                <Button
+                  asChild
+                  variant="outline"
+                  className="rounded-2xl border-white/15 bg-transparent text-white hover:bg-white/10 hover:text-white"
+                >
+                  <a href="#waitlist" onClick={() => setMobileOpen(false)}>
+                    Join Waitlist
+                  </a>
+                </Button>
+                <Button
+                  className="rounded-2xl bg-cyan-300 text-slate-950 hover:bg-cyan-200"
+                  onClick={() => {
+                    setMobileOpen(false);
+                    openAuthModal();
+                  }}
+                >
+                  Get Started Free
+                </Button>
+              </div>
+            </div>
+          ) : null}
+        </div>
+      </div>
+    </header>
+  );
 };
 
 export default Navbar;

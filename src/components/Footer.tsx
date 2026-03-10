@@ -1,143 +1,176 @@
-import { useState } from "react";
+import { FormEvent, useState } from "react";
+import { ArrowRight, BadgeCheck, Send, Smartphone } from "lucide-react";
+
+import { useAuthModal } from "@/components/auth/AuthModalProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Mail, ArrowRight, Shield, FileText, Twitter, Github, Linkedin, Slack } from "lucide-react";
+
+const footerLinks = [
+  { label: "Home", href: "#hero" },
+  { label: "Problem", href: "#problem" },
+  { label: "Solution", href: "#solution" },
+  { label: "How It Works", href: "#how-it-works" },
+  { label: "School", href: "#school" },
+  { label: "Security", href: "#security" },
+  { label: "Pricing", href: "#pricing" },
+];
 
 const Footer = () => {
+  const { openAuthModal } = useAuthModal();
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (email) {
-      setSubmitted(true);
-      setEmail("");
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!email) {
+      return;
     }
+
+    setSubmitted(true);
+    setEmail("");
   };
 
   return (
-    <footer className="bg-primary text-white relative overflow-hidden">
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[300px] bg-white/5 rounded-full blur-[100px] pointer-events-none" />
+    <footer id="waitlist" className="relative overflow-hidden bg-slate-950 text-white">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(34,211,238,0.14),transparent_28%),radial-gradient(circle_at_bottom_right,rgba(16,185,129,0.12),transparent_28%)]" />
+      <div className="pointer-events-none absolute left-1/2 top-0 h-64 w-64 -translate-x-1/2 rounded-full bg-cyan-300/10 blur-3xl" />
 
-      {/* CTA / Newsletter Section - Modern Premium */}
-      <div className="container relative z-10 py-20 lg:py-32">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
-          <div className="animate-fade-up">
-            <h2 className="text-[34px] md:text-[46px] font-bold mb-6 tracking-tight leading-[1.1]">
-              Engineered for the <br />
-              <span className="text-accent underline decoration-accent/30 underline-offset-8">Global Frontier.</span>
-            </h2>
-            <p className="text-white/60 text-[16px] font-medium max-w-lg">
-              Join 2,400+ developers and companies building the future of cross-border settlements.
-            </p>
-          </div>
+      <div className="container relative z-10 py-20 sm:py-24 lg:py-28">
+        <div className="overflow-hidden rounded-[2rem] border border-white/10 bg-white/5 p-6 backdrop-blur-xl sm:p-8 lg:p-10">
+          <div className="grid gap-8 lg:grid-cols-[1fr_minmax(0,0.88fr)] lg:items-center">
+            <div className="space-y-5">
+              <span className="eyebrow border-white/10 bg-white/10 text-cyan-100">Final CTA</span>
+              <h2 className="font-display text-3xl font-semibold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">
+                Start receiving payments with a cleaner, faster wallet flow.
+              </h2>
+              <p className="max-w-2xl text-base leading-7 text-slate-300 sm:text-lg">
+                Create your wallet or join the waitlist for app and GigChain School updates.
+              </p>
 
-          <div className="animate-fade-up" style={{ animationDelay: '0.1s' }}>
-            {!submitted ? (
-              <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 p-2 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 group focus-within:border-white/40 transition-colors">
-                <div className="relative flex-1">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
-                  <Input
-                    type="email"
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="pl-12 h-14 bg-transparent border-0 rounded-xl font-medium placeholder:text-white/20 focus-visible:ring-0 focus-visible:ring-offset-0 text-white"
-                    required
-                  />
-                </div>
-                <Button type="submit" className="h-14 rounded-xl bg-white text-primary hover:bg-white/90 px-8 font-bold shadow-lg shadow-white/10">
-                  Join Beta Access
-                  <ArrowRight className="ml-2 w-5 h-5" />
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <Button
+                  size="xl"
+                  className="group rounded-2xl bg-cyan-300 px-8 text-slate-950 hover:bg-cyan-200"
+                  onClick={openAuthModal}
+                >
+                  Create Free Wallet
+                  <ArrowRight className="transition-transform duration-300 group-hover:translate-x-1" />
                 </Button>
-              </form>
-            ) : (
-              <div className="bg-white/10 border border-white/20 p-8 rounded-2xl animate-fade-in">
-                <p className="text-white/60 font-bold uppercase tracking-[0.2em] text-[10px] mb-2">ACCESS_PENDING</p>
-                <p className="text-white font-bold text-[16px] italic">Welcome to the priority list.</p>
+                <Button
+                  asChild
+                  size="xl"
+                  variant="outline"
+                  className="rounded-2xl border-white/20 bg-transparent text-white hover:bg-white/10 hover:text-white"
+                >
+                  <a href="#waitlist-form">
+                    <Smartphone />
+                    Join App Waitlist
+                  </a>
+                </Button>
               </div>
-            )}
 
-            <div className="mt-8 flex items-center gap-6">
-              <div className="flex items-center gap-2 text-white/40 text-[9px] font-bold uppercase tracking-[0.2em]">
-                <Shield className="w-4 h-4" />
-                <span>Bank-Grade Integrity</span>
+              <div className="flex flex-col gap-3 border-t border-white/10 pt-6 sm:flex-row sm:flex-wrap">
+                {[
+                  "Early access",
+                  "Non-custodial",
+                  "School waitlist",
+                ].map((signal) => (
+                  <div key={signal} className="inline-flex items-center gap-2 text-sm text-slate-200">
+                    <BadgeCheck className="h-4 w-4 text-cyan-200" />
+                    <span>{signal}</span>
+                  </div>
+                ))}
               </div>
-              <div className="flex items-center gap-2 text-white/40 text-[9px] font-bold uppercase tracking-[0.2em]">
-                <FileText className="w-4 h-4" />
-                <span>Circle Regulated</span>
+            </div>
+
+            <div id="waitlist-form" className="rounded-[1.75rem] border border-white/10 bg-slate-950/55 p-5 sm:p-6">
+              <div className="mb-5 space-y-2">
+                <p className="text-xs uppercase tracking-[0.32em] text-cyan-100/65">Waitlist and updates</p>
+                <h3 className="font-display text-2xl font-semibold tracking-tight text-white">Get launch updates and product access news.</h3>
               </div>
+
+              {submitted ? (
+                <div className="rounded-[1.5rem] border border-emerald-300/20 bg-emerald-300/10 p-5 text-emerald-100">
+                  <p className="text-sm uppercase tracking-[0.32em] text-emerald-200/75">You are on the list</p>
+                  <p className="mt-3 text-lg font-semibold text-white">We will keep you posted on early access and GigChain School updates.</p>
+                </div>
+              ) : (
+                <form className="space-y-4" onSubmit={handleSubmit}>
+                  <div className="rounded-[1.5rem] border border-white/10 bg-white/5 p-3">
+                    <Input
+                      type="email"
+                      value={email}
+                      onChange={(event) => setEmail(event.target.value)}
+                      placeholder="name@example.com"
+                      className="h-12 border-0 bg-transparent px-2 text-base text-white placeholder:text-slate-500 focus-visible:ring-0 focus-visible:ring-offset-0"
+                      required
+                    />
+                  </div>
+                  <Button type="submit" size="xl" className="w-full rounded-2xl bg-white text-slate-950 hover:bg-slate-100">
+                    Notify Me
+                    <Send />
+                  </Button>
+                </form>
+              )}
+
+              <p className="mt-4 text-sm leading-6 text-slate-400">
+                Community channels coming next: X, Telegram, and WhatsApp updates for the early cohort.
+              </p>
             </div>
           </div>
         </div>
 
-        {/* Brand & Links */}
-        <div className="mt-24 pt-16 border-t border-white/5 grid md:grid-cols-4 lg:grid-cols-5 gap-12">
-          <div className="md:col-span-2">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="w-10 h-10 bg-white flex items-center justify-center rounded-xl">
-                <span className="text-primary font-bold text-[17px]">GP</span>
+        <div className="mt-12 grid gap-8 border-t border-white/10 pt-10 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-cyan-300/10 text-lg font-semibold text-cyan-100">
+                G
               </div>
-              <span className="text-[22px] font-bold tracking-tight">GigPay</span>
+              <div>
+                <p className="font-display text-xl font-semibold text-white">GigChain Pay</p>
+                <p className="text-sm text-slate-400">Instant USDC payments for Kenyan freelancers.</p>
+              </div>
             </div>
-            <p className="text-white/40 text-[12px] font-medium leading-relaxed max-w-xs mb-8">
-              The high-performance settlement layer for the global economy. Built on the integrity of the Hedera network.
+            <p className="max-w-md text-sm leading-7 text-slate-400">
+              Instant USDC payments for Kenyan freelancers, with a cleaner mobile-first experience.
             </p>
-            <div className="flex items-center gap-4">
-              <a href="#" className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center hover:bg-white/20 transition-colors">
-                <Twitter className="w-5 h-5 text-white/60" />
-              </a>
-              <a href="#" className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center hover:bg-white/20 transition-colors">
-                <Github className="w-5 h-5 text-white/60" />
-              </a>
-              <a href="#" className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center hover:bg-white/20 transition-colors">
-                <Linkedin className="w-5 h-5 text-white/60" />
-              </a>
-              <a href="#" className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center hover:bg-white/20 transition-colors">
-                <Slack className="w-5 h-5 text-white/60" />
-              </a>
+          </div>
+
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div>
+              <p className="text-xs uppercase tracking-[0.32em] text-cyan-100/65">Navigate</p>
+              <div className="mt-4 grid gap-3">
+                {footerLinks.map((link) => (
+                  <a key={link.href} href={link.href} className="text-sm text-slate-300 transition-colors hover:text-white">
+                    {link.label}
+                  </a>
+                ))}
+              </div>
             </div>
-          </div>
 
-          <div>
-            <h4 className="font-bold text-white mb-6 uppercase tracking-widest text-[9px]">Protocol</h4>
-            <ul className="space-y-4">
-              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-[12px] font-medium">Liquidity Pool</a></li>
-              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-[12px] font-medium">Network Status</a></li>
-              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-[12px] font-medium">Hedera Token Svc</a></li>
-              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-[12px] font-medium">Governance</a></li>
-            </ul>
-          </div>
+            <div>
+              <p className="text-xs uppercase tracking-[0.32em] text-cyan-100/65">Product</p>
+              <div className="mt-4 grid gap-3 text-sm text-slate-300">
+                <span>Global payouts</span>
+                <span>Wallet onboarding</span>
+                <span>KYC verification</span>
+                <span>GigChain School roadmap</span>
+              </div>
+            </div>
 
-          <div>
-            <h4 className="font-bold text-white mb-6 uppercase tracking-widest text-[9px]">Resources</h4>
-            <ul className="space-y-4">
-              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-[12px] font-medium">Documentation</a></li>
-              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-[12px] font-medium">Integrations</a></li>
-              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-[12px] font-medium">Security Audit</a></li>
-              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-[12px] font-medium">Ecosystem</a></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-bold text-white mb-6 uppercase tracking-widest text-[9px]">Company</h4>
-            <ul className="space-y-4">
-              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-[12px] font-medium">About</a></li>
-              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-[12px] font-medium">Terms</a></li>
-              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-[12px] font-medium">Privacy</a></li>
-              <li><a href="#" className="text-white/40 hover:text-white transition-colors text-[12px] font-medium">Contact</a></li>
-            </ul>
+            <div>
+              <p className="text-xs uppercase tracking-[0.32em] text-cyan-100/65">Company</p>
+              <div className="mt-4 grid gap-3 text-sm text-slate-300">
+                <span>Nairobi, Kenya</span>
+                <span>Security-first positioning</span>
+                <span>Privacy and terms coming with production launch</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="mt-24 pb-12 border-t border-white/5 pt-12 flex flex-col md:flex-row items-center justify-between gap-6">
-          <p className="text-white/20 text-[11px] font-medium tracking-tight">
-            © 2026 GIGPAY NETWORK. ALL RIGHTS RESERVED.
-          </p>
-          <div className="flex gap-8">
-            <span className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em]">HEDERA_ECOSYSTEM</span>
-            <span className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em]">USDC_COMPLIANT</span>
-          </div>
+        <div className="mt-10 border-t border-white/10 pt-6 text-sm text-slate-500">
+          © 2026 GigChain Pay Limited. Nairobi, Kenya.
         </div>
       </div>
     </footer>

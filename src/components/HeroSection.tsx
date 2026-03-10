@@ -1,150 +1,169 @@
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { ArrowRight, Clock, ShieldCheck, Zap } from "lucide-react";
+import { ArrowRight, CheckCircle2, Globe2, PhoneCall, Play, ShieldCheck, Wallet } from "lucide-react";
+
+import heroImage from "@/assets/hero-image.jpg";
+import Reveal from "@/components/landing/Reveal";
 import { useAuthModal } from "@/components/auth/AuthModalProvider";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  type CarouselApi,
-} from "@/components/ui/carousel";
+import { Button } from "@/components/ui/button";
+
+const trustSignals = [
+  { icon: Globe2, label: "Hedera + Solana" },
+  { icon: Wallet, label: "Non-custodial" },
+  { icon: ShieldCheck, label: "KYC-ready" },
+];
+
+const heroStats = [
+  { value: "~5 sec", label: "Settlement" },
+  { value: "<1%", label: "Target fee" },
+  { value: "Phone-first", label: "Local UX" },
+];
 
 const HeroSection = () => {
   const { openAuthModal } = useAuthModal();
-  const [api, setApi] = useState<CarouselApi>();
-  const [current, setCurrent] = useState(0);
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    if (!api) return;
-
-    setCount(api.scrollSnapList().length);
-    setCurrent(api.selectedScrollSnap());
-
-    api.on("select", () => {
-      setCurrent(api.selectedScrollSnap());
-    });
-
-    const intervalId = setInterval(() => {
-      api.scrollNext();
-    }, 4500);
-
-    return () => clearInterval(intervalId);
-  }, [api]);
 
   return (
-    <section className="relative h-screen min-h-[650px] flex items-center bg-background overflow-hidden selection:bg-accent/20 -mb-px">
-      {/* Background decorative elements - polished */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 right-0 w-[1000px] h-[1000px] bg-primary/2 rounded-full blur-[140px] -translate-y-1/2 translate-x-1/3" />
-        <div className="absolute bottom-0 left-0 w-[800px] h-[800px] bg-primary/5 rounded-full blur-[120px] translate-y-1/3 -translate-x-1/4" />
-      </div>
+    <section
+      id="hero"
+      className="relative overflow-hidden bg-landing-hero pb-16 pt-28 text-white sm:pb-20 sm:pt-32 lg:pb-24 lg:pt-36"
+    >
+      <div className="hero-grid pointer-events-none absolute inset-0 opacity-60" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-cyan-300/10 to-transparent" />
+      <div className="pointer-events-none absolute -left-24 top-32 h-72 w-72 rounded-full bg-emerald-400/10 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-0 right-0 h-80 w-80 rounded-full bg-sky-400/10 blur-3xl" />
 
-      <div className="container relative z-10 py-6 md:py-8 px-4 md:px-6 lg:px-24 flex flex-col justify-between h-full max-w-[1400px] mx-auto">
+      <div className="container relative z-10">
+        <div className="grid items-center gap-14 lg:grid-cols-[1.05fr_minmax(0,0.95fr)] lg:gap-10">
+          <Reveal className="space-y-8">
+            <div className="space-y-5">
+             
 
-        {/* Top: Centered Content */}
-        <div className="w-full mt-6 md:mt-8 lg:mt-12 animate-fade-up text-center px-2 md:px-4 lg:px-12">
-          <h1 className="text-[24px] sm:text-[28px] md:text-[46px] lg:text-[70px] font-black text-primary leading-[1.1] mb-3 md:mb-4 tracking-tighter">
-            Fast Global Payments.
-          </h1>
-          <h2 className="text-accent italic text-[18px] sm:text-[22px] md:text-[34px] lg:text-[46px] mb-6 md:mb-8 tracking-tighter">
-            Near zero costs. Real independence.
-          </h2>
-          
-          <p className="text-primary/60 text-[13px] md:text-[14px] lg:text-[16px] max-w-2xl mx-auto font-medium leading-relaxed px-2">
-            Send and receive money globally in seconds. Near zero costs, instant settlement, no delays.
-          </p>
-        </div>
-
-        {/* Bottom Section: Right-Shifted Grouped Interactive Section */}
-        <div className="w-full max-w-[1100px] mx-auto grid lg:grid-cols-5 gap-6 md:gap-10 items-center mb-8 md:mb-10 lg:mb-12">
-
-          {/* Left Columns (3/5): Right-Shifted CTAs */}
-          <div className="lg:col-span-3 animate-fade-up space-y-4 md:space-y-6 flex flex-col items-center lg:items-end lg:pr-12" style={{ animationDelay: '0.1s' }}>
-            <div className="flex flex-wrap items-center gap-3 md:gap-4 justify-center lg:justify-end w-full">
-              <Button onClick={openAuthModal} className="rounded-xl md:rounded-2xl px-6 md:px-10 py-5 md:py-7 text-[12px] md:text-[14px] font-bold shadow-2xl shadow-primary/10 transition-all hover:-translate-y-1 whitespace-nowrap">
-                Getting Started
-                <ArrowRight className="w-4 h-4 md:w-5 md:h-5 ml-1.5 md:ml-2" />
-              </Button>
-              <Button variant="outline" className="rounded-xl md:rounded-2xl px-6 md:px-10 py-5 md:py-7 text-[12px] md:text-[14px] font-bold bg-white/50 backdrop-blur-sm border-primary/10 transition-all hover:-translate-y-1 whitespace-nowrap">
-                Download App
-              </Button>
-            </div>
-
-            <div className="flex flex-col sm:flex-row items-center gap-6 justify-center lg:justify-end w-full">
-              <div className="flex items-center gap-3 px-5 py-2.5 bg-accent/10 rounded-full border border-accent/20">
-                <Zap className="w-4 h-4 text-accent" />
-                <span className="text-[10px] font-black text-primary uppercase tracking-wider">You Own Your Keys</span>
+              <div className="space-y-5">
+                <h1 className="font-display max-w-3xl text-4xl font-semibold leading-[1.02] tracking-tight text-white sm:text-5xl lg:text-7xl">
+                  Instant Low-fee global payments for Kenyan freelancers.
+                </h1>
+                <p className="max-w-2xl text-base leading-7 text-slate-300 sm:text-lg lg:text-xl">
+                  Receive USDC from clients worldwide in seconds with a phone-first wallet.
+                </p>
               </div>
-              <p className="text-[8px] text-primary/30 leading-relaxed font-black uppercase tracking-[0.4em]">
-                Non-Custodial • Phone-Based • Global
-              </p>
             </div>
-          </div>
 
-          {/* Right Columns (2/5): Mature & Rounded Carousel */}
-          <div className="lg:col-span-2 flex justify-center lg:justify-start animate-fade-up blur-in" style={{ animationDelay: '0.3s' }}>
-            <div className="relative group/carousel w-full max-w-[320px]">
-              <Carousel
-                setApi={setApi}
-                opts={{
-                  align: "start",
-                  loop: true,
-                }}
-                className="w-full"
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Button
+                size="xl"
+                className="group rounded-2xl bg-cyan-300 px-8 text-slate-950 hover:bg-cyan-200"
+                onClick={openAuthModal}
               >
-                <CarouselContent className="-ml-4">
-                  <CarouselItem className="basis-full pl-4">
-                    <div className="p-8 h-full bg-primary/5 rounded-[2.25rem] border border-primary/10 shadow-sm transition-all hover:bg-primary/10 group flex flex-col items-center justify-center text-center relative overflow-hidden min-h-[200px]">
-                      <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2" />
-                      <div className="w-12 h-12 rounded-2xl bg-accent/10 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-500">
-                        <Zap className="w-6 h-6 text-accent" />
-                      </div>
-                      <p className="text-[18px] font-black text-primary tracking-tighter mb-1.5 group-hover:text-accent transition-colors">You Own It</p>
-                      <p className="text-primary/40 text-[6px] font-black uppercase tracking-[0.3em]">Private keys stored on your device</p>
-                    </div>
-                  </CarouselItem>
-                  <CarouselItem className="basis-full pl-4">
-                    <div className="p-8 h-full bg-primary rounded-[2.25rem] border border-white/10 shadow-lg transition-all hover:bg-primary/95 flex flex-col items-center justify-center text-center relative overflow-hidden min-h-[200px]">
-                      <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2" />
-                      <div className="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center mb-5">
-                        <Clock className="w-6 h-6 text-white" />
-                      </div>
-                      <p className="text-[18px] font-black text-white tracking-tighter mb-1.5">Near Zero Fees</p>
-                      <p className="text-white/40 text-[6px] font-black uppercase tracking-[0.3em]">$0.0001-$0.001 per transaction</p>
-                    </div>
-                  </CarouselItem>
-                  <CarouselItem className="basis-full pl-4">
-                    <div className="p-8 h-full bg-accent/5 rounded-[2.25rem] border border-accent/20 shadow-sm transition-all hover:bg-accent/10 group flex flex-col items-center justify-center text-center relative overflow-hidden min-h-[200px]">
-                      <div className="absolute top-0 left-0 w-32 h-32 bg-accent/5 rounded-full blur-2xl -translate-y-1/2 -translate-x-1/2" />
-                      <div className="w-12 h-12 rounded-2xl bg-accent/20 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-500">
-                        <ShieldCheck className="w-6 h-6 text-accent" />
-                      </div>
-                      <p className="text-[18px] font-black text-primary tracking-tighter mb-1.5 group-hover:text-accent transition-colors">Earn Yield</p>
-                      <p className="text-primary/40 text-[6px] font-black uppercase tracking-[0.3em]">4-8% APY on USDC</p>
-                    </div>
-                  </CarouselItem>
-                </CarouselContent>
-
-                {/* Refined Rounded Indicator Tabs */}
-                <div className="flex justify-center lg:justify-start gap-3 mt-8 lg:pl-6">
-                  {Array.from({ length: count }).map((_, i) => (
-                    <button
-                      key={i}
-                      className={`h-2 transition-all duration-700 rounded-full border border-primary/10 shadow-sm ${current === i
-                          ? "w-10 bg-accent border-accent shadow-[0_0_12px_-2px_rgba(16,185,129,0.4)]"
-                          : "w-2 bg-primary/5 hover:bg-primary/20 hover:border-primary/20"
-                        }`}
-                      onClick={() => api?.scrollTo(i)}
-                      aria-label={`Go to slide ${i + 1}`}
-                    />
-                  ))}
-                </div>
-              </Carousel>
+                Get Started Free
+                <ArrowRight className="transition-transform duration-300 group-hover:translate-x-1" />
+              </Button>
+              <Button
+                asChild
+                size="xl"
+                variant="outline"
+                className="rounded-2xl border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white"
+              >
+                <a href="#how-it-works">
+                  <Play className="fill-current" />
+                  See the 45-second flow
+                </a>
+              </Button>
             </div>
-          </div>
-        </div>
 
+            <div className="flex flex-wrap gap-3 border-t border-white/10 pt-6">
+              {trustSignals.map(({ icon: Icon, label }) => (
+                <div key={label} className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-200">
+                  <Icon className="h-4 w-4 text-cyan-200" />
+                  <span>{label}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="grid gap-4 border-t border-white/10 pt-6 sm:grid-cols-3">
+              {heroStats.map((stat, index) => (
+                <Reveal
+                  key={stat.label}
+                  delay={index * 100}
+                  className="rounded-3xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl"
+                >
+                  <p className="font-display text-2xl font-semibold text-white sm:text-3xl">{stat.value}</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-300">{stat.label}</p>
+                </Reveal>
+              ))}
+            </div>
+          </Reveal>
+
+          <Reveal delay={150} className="relative mx-auto w-full max-w-xl lg:max-w-none">
+            <div className="float-slow absolute -left-10 top-10 hidden rounded-3xl border border-white/12 bg-slate-950/70 p-4 shadow-2xl backdrop-blur-xl md:block">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-400/15 text-emerald-300">
+                  <CheckCircle2 className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Incoming payout</p>
+                  <p className="mt-1 text-sm font-semibold text-white">$480 USDC received in Nairobi</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="float-slow float-delay absolute -right-4 bottom-14 hidden rounded-3xl border border-cyan-300/20 bg-cyan-300/10 p-4 shadow-2xl backdrop-blur-xl md:block">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-cyan-100">
+                  <PhoneCall className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-[0.3em] text-cyan-100/70">Identity layer</p>
+                  <p className="mt-1 text-sm font-semibold text-white">Phone number linked wallet</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="glass-panel relative overflow-hidden rounded-[2rem] p-4 sm:p-6">
+              <div className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-cyan-200/60 to-transparent" />
+              <div className="grid gap-5 lg:grid-cols-[minmax(0,0.86fr)_minmax(0,1fr)]">
+                <div className="space-y-4 rounded-[1.5rem] border border-white/10 bg-slate-950/70 p-5">
+                  <div className="flex items-center justify-between">
+                    <div>
+                    <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Live payout path</p>
+                    <p className="mt-2 text-xl font-semibold text-white">Client to wallet in seconds</p>
+                  </div>
+                    <div className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-300">
+                      Early access
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    {[
+                      "Client sends USDC",
+                      "Phone-linked wallet resolves the receiver",
+                      "Funds stay liquid for local payout routes",
+                    ].map((item) => (
+                      <div key={item} className="flex items-start gap-3 rounded-2xl border border-white/6 bg-white/5 p-3">
+                        <CheckCircle2 className="mt-0.5 h-5 w-5 text-cyan-200" />
+                        <span className="text-sm leading-6 text-slate-200">{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-slate-900/60">
+                  <img
+                    src={heroImage}
+                    alt="Kenyan freelancer receiving a global USDC payout through GigChain Pay"
+                    className="h-full min-h-[320px] w-full object-cover sm:min-h-[380px]"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/35 to-transparent" />
+                  <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
+                    <div className="rounded-[1.5rem] border border-white/12 bg-slate-950/70 p-4 backdrop-blur-xl">
+                      <p className="text-xs uppercase tracking-[0.32em] text-cyan-100/70">Designed for Kenyan teams</p>
+                      <p className="mt-2 text-lg font-semibold text-white sm:text-xl">
+                        Global clients pay in dollars. You keep control over the wallet and the timing.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Reveal>
+        </div>
       </div>
     </section>
   );

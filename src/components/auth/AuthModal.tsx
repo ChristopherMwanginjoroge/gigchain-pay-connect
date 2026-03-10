@@ -169,7 +169,7 @@ const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
       <DialogContent className="sm:max-w-[480px]">
         <DialogHeader>
           <DialogTitle>
-            {step === "verify" ? "Confirm Your Signup" : mode === "signin" ? "Sign in to GigPay" : "Create your GigPay account"}
+            {step === "verify" ? "Confirm Your Signup" : mode === "signin" ? "Sign in to GigChain Pay" : "Create your GigChain Pay account"}
           </DialogTitle>
           <DialogDescription>
             {step === "verify"
