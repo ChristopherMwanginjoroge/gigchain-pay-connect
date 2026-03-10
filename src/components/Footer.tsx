@@ -124,8 +124,8 @@ const Footer = () => {
         <div className="mt-12 grid gap-8 border-t border-white/10 pt-10 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-cyan-300/10 text-lg font-semibold text-cyan-100">
-                G
+              <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full">
+                <img src="/gigpay-logo.png" alt="GigChain Pay Logo" className="h-full w-full object-contain" />
               </div>
               <div>
                 <p className="font-display text-xl font-semibold text-white">GigChain Pay</p>

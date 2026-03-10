@@ -46,13 +46,15 @@ const Navbar = () => {
       <div className="container">
         <div
           className={`transition-all duration-300 ${
-            scrolled ? "border-white/12 bg-slate-950/82 shadow-2xl shadow-slate-950/20" : "border-white/10 bg-slate-950/55"
+            scrolled 
+              ? "border-white/15 bg-slate-950/95 shadow-2xl shadow-slate-950/30" 
+              : "border-white/12 bg-slate-950/90"
           } rounded-[1.5rem] border backdrop-blur-xl`}
         >
           <div className="flex items-center justify-between px-4 py-3 sm:px-6">
             <a href="#hero" className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-cyan-300/12 text-lg font-semibold text-cyan-100">
-                G
+              <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full">
+                <img src="/gigpay-logo.png" alt="GigChain Pay Logo" className="h-full w-full object-contain" />
               </div>
               <div>
                 <p className="font-display text-base font-semibold tracking-tight text-white sm:text-lg">GigChain Pay</p>
